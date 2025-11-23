@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    container_name: restaurant-booking-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: restaurant_booking
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: restaurant-booking-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/restaurant_booking
+      JWT_SECRET: dev-secret-change-in-production
+      JWT_EXPIRES_IN: 7d
+      FRONTEND_URL: http://localhost:5173
+    ports:
+      - "3000:3000"
+    # Volúmenes deshabilitados por problemas de permisos en macOS
+    # Para cambios en código: npm run docker:rebuild
+    # volumes:
+    #   - .:/app
+    #   - /app/node_modules
+    command: sh -c "npx prisma migrate deploy && npm run dev"
+
+volumes:
+  postgres_data:
