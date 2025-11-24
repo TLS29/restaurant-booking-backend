@@ -1,0 +1,101 @@
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: User unique identifier
+          example: 550e8400-e29b-41d4-a716-446655440000
+        email:
+          type: string
+          format: email
+          description: User email address
+          example: john.doe@example.com
+        firstName:
+          type: string
+          description: User first name
+          example: John
+        lastName:
+          type: string
+          description: User last name
+          example: Doe
+        phone:
+          type: string
+          nullable: true
+          description: User phone number (optional)
+          example: "+1234567890"
+        role:
+          type: string
+          enum: [customer, super_admin]
+          description: User role in the system
+          example: customer
+        createdAt:
+          type: string
+          format: date-time
+          description: Account creation timestamp
+          example: 2025-01-15T10:30:00Z
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+          example: 2025-01-15T10:30:00Z
+
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+        - firstName
+        - lastName
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email address
+          example: john.doe@example.com
+        password:
+          type: string
+          minLength: 8
+          description: User password (minimum 8 characters)
+          example: securePass123
+        firstName:
+          type: string
+          minLength: 1
+          description: User first name
+          example: John
+        lastName:
+          type: string
+          minLength: 1
+          description: User last name
+          example: Doe
+        phone:
+          type: string
+          description: User phone number (optional)
+          example: "+1234567890"
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              example: 550e8400-e29b-41d4-a716-446655440000
+            email:
+              type: string
+              format: email
+              example: john.doe@example.com
+            firstName:
+              type: string
+              example: John
+            lastName:
+              type: string
+              example: Doe
+        token:
+          type: string
+          description: JWT authentication token
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NTBlODQwMC1lMjliLTQxZDQtYTcxNi00NDY2NTU0NDAwMDAiLCJyb2xlIjoiY3VzdG9tZXIiLCJpYXQiOjE3MzczOTg0MDB9.signature
