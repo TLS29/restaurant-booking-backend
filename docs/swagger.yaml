@@ -1,0 +1,54 @@
+openapi: 3.0.0
+info:
+  title: Restaurant Booking API
+  version: 1.0.0
+  description: Multi-tenant restaurant reservation system API
+  contact:
+    name: API Support
+    email: support@restaurantbooking.com
+
+servers:
+  - url: http://localhost:3000
+    description: Development server
+
+tags:
+  - name: Authentication
+    description: User authentication and registration
+  - name: Restaurants
+    description: Restaurant management (coming soon)
+  - name: Reservations
+    description: Reservation management (coming soon)
+  - name: Admin
+    description: Admin operations (coming soon)
+
+paths:
+  # Authentication endpoints
+  /api/auth/register:
+    $ref: './auth.yaml#/paths/~1api~1auth~1register'
+
+  # Future endpoints will be added here
+  # /api/restaurants:
+  #   $ref: './restaurants.yaml#/paths/~1api~1restaurants'
+
+components:
+  schemas:
+    # Common schemas
+    Error:
+      $ref: './schemas/errors.yaml#/components/schemas/Error'
+    ValidationError:
+      $ref: './schemas/errors.yaml#/components/schemas/ValidationError'
+
+    # Entity schemas
+    User:
+      $ref: './schemas/user.yaml#/components/schemas/User'
+    RegisterRequest:
+      $ref: './schemas/user.yaml#/components/schemas/RegisterRequest'
+    AuthResponse:
+      $ref: './schemas/user.yaml#/components/schemas/AuthResponse'
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for authenticated requests

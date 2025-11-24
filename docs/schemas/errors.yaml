@@ -1,0 +1,33 @@
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: Internal server error
+
+    ValidationError:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error type
+          example: Validation error
+        details:
+          type: array
+          description: List of validation errors
+          items:
+            type: object
+            properties:
+              path:
+                type: array
+                items:
+                  type: string
+                description: Field path that failed validation
+                example: ["email"]
+              message:
+                type: string
+                description: Validation error message
+                example: Invalid email format

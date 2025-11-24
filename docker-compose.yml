@@ -39,12 +39,10 @@ services:
       FRONTEND_URL: http://localhost:5173
     ports:
       - "3000:3000"
-    # Volúmenes deshabilitados por problemas de permisos en macOS
-    # Para cambios en código: npm run docker:rebuild
-    # volumes:
-    #   - .:/app
-    #   - /app/node_modules
-    command: sh -c "npx prisma migrate deploy && npm run dev"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: sh -c "npx prisma generate && npx prisma migrate deploy && npm run dev"
 
 volumes:
   postgres_data:

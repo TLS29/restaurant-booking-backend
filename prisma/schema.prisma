@@ -37,7 +37,7 @@ enum UserRole {
 }
 
 enum StaffRole {
-  owner   
+  owner
   manager 
   admin   
 }

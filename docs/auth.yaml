@@ -1,0 +1,54 @@
+paths:
+  /api/auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new customer
+      description: Creates a new customer user account with email and password
+      operationId: registerCustomer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/user.yaml#/components/schemas/RegisterRequest'
+            example:
+              email: john.doe@example.com
+              password: securePass123
+              firstName: John
+              lastName: Doe
+              phone: "+1234567890"
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User registered successfully
+                  data:
+                    $ref: './schemas/user.yaml#/components/schemas/AuthResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/ValidationError'
+              example:
+                error: Validation error
+                details:
+                  - path: ["email"]
+                    message: Invalid email format
+                  - path: ["password"]
+                    message: Password must be at least 8 characters
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+              example:
+                error: Internal server error
