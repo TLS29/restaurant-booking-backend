@@ -34,6 +34,7 @@ app.get("/health", (req: Request, res: Response) => {
 
 // API routes will go here
 app.use("/api/auth", authRoutes);
+app.use("/api/auth", authRoutes);
 // app.use('/api/restaurants', restaurantRoutes);
 // app.use('/api/reservations', reservationRoutes);
 // app.use('/api/admin', adminRoutes);

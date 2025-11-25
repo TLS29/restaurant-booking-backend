@@ -52,3 +52,49 @@ paths:
                 $ref: './schemas/errors.yaml#/components/schemas/Error'
               example:
                 error: Internal server error
+
+  /api/auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login user
+      description: Authenticates a user with email and password, returns JWT token
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/user.yaml#/components/schemas/LoginRequest'
+            example:
+              email: john.doe@example.com
+              password: securePass123
+      responses:
+        '200':
+          description: User logged in successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User logged in successfully
+                  data:
+                    $ref: './schemas/user.yaml#/components/schemas/AuthResponse'
+        '400':
+          description: Validation error or invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+              example:
+                error: Invalid email or password
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+              example:
+                error: Internal server error
