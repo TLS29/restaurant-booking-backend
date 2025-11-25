@@ -25,6 +25,8 @@ paths:
   # Authentication endpoints
   /api/auth/register:
     $ref: './auth.yaml#/paths/~1api~1auth~1register'
+  /api/auth/login:
+    $ref: './auth.yaml#/paths/~1api~1auth~1login'
 
   # Future endpoints will be added here
   # /api/restaurants:
@@ -43,6 +45,8 @@ components:
       $ref: './schemas/user.yaml#/components/schemas/User'
     RegisterRequest:
       $ref: './schemas/user.yaml#/components/schemas/RegisterRequest'
+    LoginRequest:
+      $ref: './schemas/user.yaml#/components/schemas/LoginRequest'
     AuthResponse:
       $ref: './schemas/user.yaml#/components/schemas/AuthResponse'
 
