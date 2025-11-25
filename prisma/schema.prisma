@@ -25,21 +25,22 @@ model User {
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt     DateTime @updatedAt   @map("updated_at") @db.Timestamp(6)
 
-  restaurantAccess UserRestaurant[]
-  reservations     Reservation[]
+  restaurantAccess  UserRestaurant[]
+  reservations      Reservation[]
+  ownedRestaurants  Restaurant[]
 
   @@map("users")
 }
 
 enum UserRole {
   customer
+  owner
   super_admin
 }
 
 enum StaffRole {
-  owner
-  manager 
-  admin   
+  manager
+  staff
 }
 
 model UserRestaurant {
@@ -71,6 +72,9 @@ model Restaurant {
   reservationDuration Int      @default(90) @map("reservation_duration")
   createdAt           DateTime @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamp(6)
+  ownerId             String   @map("owner_id") @db.Uuid
+
+  owner    User    @relation(fields: [ownerId], references: [id], onDelete: Restrict)
 
   staff               UserRestaurant[]
   tables              Table[]
