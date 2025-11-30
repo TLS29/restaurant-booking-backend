@@ -1,10 +1,9 @@
-// User repository Prisma implementation
 import prisma from "../../config/databases/prisma";
 import {
   IUserRepository,
   User,
   CreateUserData,
-} from "../interfaces/user.repository.interface";
+} from "../interfaces/user";
 
 /**
  * Prisma implementation of the User Repository

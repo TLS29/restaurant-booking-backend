@@ -1,5 +1,5 @@
-import { RegisterDTO } from "../../dto/auth.dto";
-import { userRepository } from "../../repositories/prisma/user.repository.prisma";
+import { RegisterDTO } from "../../dto/auth";
+import { userRepository } from "../../repositories/prisma/user";
 import { hashPassword } from "../../utils/password";
 import { generateToken } from "../../utils/jwt";
 

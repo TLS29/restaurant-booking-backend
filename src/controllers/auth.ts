@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { registerSchema, loginSchema } from "../dto/auth.dto";
-import * as RegisterUseCase from "../use-cases/auth/register.use-case";
-import * as LoginUserCase from "../use-cases/auth/login.use-case";
+import { registerSchema, loginSchema } from "../dto/auth";
+import * as RegisterUseCase from "../use-cases/auth/register";
+import * as LoginUseCase from "../use-cases/auth/login";
 import { z } from "zod";
 
 /**
@@ -59,7 +59,7 @@ export const register = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
   try {
     const validatedData = loginSchema.parse(req.body);
-    const result = await LoginUserCase.execute(validatedData);
+    const result = await LoginUseCase.execute(validatedData);
     res.status(200).json({
       message: "User logged in successfully",
       data: result,

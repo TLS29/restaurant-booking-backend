@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger";
 
-import authRoutes from "./routes/auth.routes";
+import authRoutes from "./routes/auth";
 
 dotenv.config();
 

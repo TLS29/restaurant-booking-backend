@@ -1,8 +1,16 @@
-import { userRepository } from "../../repositories/prisma/user.repository.prisma";
+import { userRepository } from "../../repositories/prisma/user";
 import { generateToken } from "../../utils/jwt";
 import { comparePassword } from "../../utils/password";
-import { LoginDTO } from "../../dto/auth.dto";
+import { LoginDTO } from "../../dto/auth";
 
+/**
+ * Login Use Case
+ * Handles the business logic for user authentication
+ *
+ * @param data - Login credentials (email, password)
+ * @returns Object containing user info (without password) and JWT token
+ * @throws {Error} If email or password is invalid
+ */
 export const execute = async (data: LoginDTO) => {
   const { email, password } = data;
 
