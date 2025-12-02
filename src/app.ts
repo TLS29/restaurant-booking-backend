@@ -4,7 +4,8 @@ import dotenv from "dotenv";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger";
 
-import authRoutes from "./routes/auth.routes";
+import authRoutes from "./routes/auth";
+import superAdminRoutes from "./routes/superAdmin";
 
 dotenv.config();
 
@@ -34,10 +35,7 @@ app.get("/health", (req: Request, res: Response) => {
 
 // API routes will go here
 app.use("/api/auth", authRoutes);
-
-// app.use('/api/restaurants', restaurantRoutes);
-// app.use('/api/reservations', reservationRoutes);
-// app.use('/api/admin', adminRoutes);
+app.use("/api/super-admin", superAdminRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {

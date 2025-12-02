@@ -1,5 +1,6 @@
-import { RegisterDTO } from "../../dto/auth.dto";
-import { userRepository } from "../../repositories/prisma/user.repository.prisma";
+import { RegisterDTO } from "../../dto/auth";
+import { userRepository } from "../../repositories/prisma/user";
+import { UserRole } from "@prisma/client";
 import { hashPassword } from "../../utils/password";
 import { generateToken } from "../../utils/jwt";
 
@@ -25,7 +26,7 @@ export const execute = async (data: RegisterDTO) => {
     firstName: data.firstName,
     lastName: data.lastName,
     phone: data.phone,
-    role: "customer",
+    role: UserRole.customer,
   });
 
   const token = generateToken({ userId: user.id, role: user.role });

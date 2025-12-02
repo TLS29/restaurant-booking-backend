@@ -1,6 +1,15 @@
 import { verifyToken } from "../utils/jwt";
 import { Request, Response, NextFunction } from "express";
 
+/**
+ * Authentication Middleware
+ * Verifies JWT token from Authorization header and attaches user to request
+ *
+ * @param req - Express request object
+ * @param res - Express response object
+ * @param next - Express next function
+ * @returns 401 if token is missing or invalid, otherwise calls next()
+ */
 export const authMiddleware = async (
   req: Request,
   res: Response,
