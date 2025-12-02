@@ -1,9 +1,24 @@
 import prisma from "../../config/databases/prisma";
-import {
-  IUserRepository,
-  User,
-  CreateUserData,
-} from "../interfaces/user";
+import { User, CreateUserData } from "../../domain/user.entity";
+import { IUserRepository } from "../interfaces/user";
+import { User as PrismaUser } from "@prisma/client";
+
+/**
+ * Maps Prisma User to Domain User entity
+ */
+function toDomain(prismaUser: PrismaUser): User {
+  return new User(
+    prismaUser.id,
+    prismaUser.email,
+    prismaUser.passwordHash,
+    prismaUser.firstName,
+    prismaUser.lastName,
+    prismaUser.phone,
+    prismaUser.role,
+    prismaUser.createdAt,
+    prismaUser.updatedAt
+  );
+}
 
 /**
  * Prisma implementation of the User Repository
@@ -12,36 +27,31 @@ import {
 export class UserRepositoryPrisma implements IUserRepository {
   /**
    * Finds a user by email address
-   *
-   * @param email - User email address
-   * @returns User object if found, null otherwise
    */
   async findByEmail(email: string): Promise<User | null> {
-    return prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { email },
     });
+
+    return user ? toDomain(user) : null;
   }
 
   /**
    * Finds a user by ID
-   *
-   * @param id - User UUID
-   * @returns User object if found, null otherwise
    */
   async findById(id: string): Promise<User | null> {
-    return prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { id },
     });
+
+    return user ? toDomain(user) : null;
   }
 
   /**
    * Creates a new user in the database
-   *
-   * @param data - User creation data
-   * @returns Created user object
    */
   async create(data: CreateUserData): Promise<User> {
-    return prisma.user.create({
+    const user = await prisma.user.create({
       data: {
         email: data.email,
         passwordHash: data.passwordHash,
@@ -51,6 +61,8 @@ export class UserRepositoryPrisma implements IUserRepository {
         role: data.role,
       },
     });
+
+    return toDomain(user);
   }
 }
 
