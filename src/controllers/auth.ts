@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import { registerSchema, loginSchema } from "../dto/auth";
-import * as RegisterUseCase from "../use-cases/auth/register";
-import * as LoginUseCase from "../use-cases/auth/login";
+import * as Register from "../use-cases/auth/register";
+import * as Login from "../use-cases/auth/login";
 import { z } from "zod";
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../constants/messages";
 
 /**
  * Register Controller
@@ -19,15 +20,15 @@ import { z } from "zod";
 export const register = async (req: Request, res: Response) => {
   try {
     const validatedData = registerSchema.parse(req.body);
-    const result = await RegisterUseCase.execute(validatedData);
+    const result = await Register.execute(validatedData);
     res.status(201).json({
-      message: "User registered successfully",
+      message: SUCCESS_MESSAGES.USER_REGISTERED,
       data: result,
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({
-        error: "Validation error",
+        error: ERROR_MESSAGES.VALIDATION_ERROR,
         details: error.issues,
       });
     }
@@ -39,7 +40,7 @@ export const register = async (req: Request, res: Response) => {
     }
 
     res.status(500).json({
-      error: "Internal server error",
+      error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
     });
   }
 };
@@ -59,15 +60,15 @@ export const register = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
   try {
     const validatedData = loginSchema.parse(req.body);
-    const result = await LoginUseCase.execute(validatedData);
+    const result = await Login.execute(validatedData);
     res.status(200).json({
-      message: "User logged in successfully",
+      message: SUCCESS_MESSAGES.USER_LOGGED_IN,
       data: result,
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({
-        error: "Validation error",
+        error: ERROR_MESSAGES.VALIDATION_ERROR,
         details: error.issues,
       });
     }
@@ -79,7 +80,7 @@ export const login = async (req: Request, res: Response) => {
     }
 
     res.status(500).json({
-      error: "Internal server error",
+      error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
     });
   }
 };
