@@ -14,7 +14,8 @@ export class User {
     public readonly phone: string | null,
     public readonly role: UserRole,
     public readonly createdAt: Date,
-    public readonly updatedAt: Date
+    public readonly updatedAt: Date,
+    public readonly deletedAt: Date | null
   ) {}
 
   /**
@@ -73,3 +74,5 @@ export interface CreateUserData {
   phone?: string;
   role: UserRole;
 }
+
+export type UpdateUserData = Partial<CreateUserData> & { id: string };

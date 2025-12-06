@@ -24,6 +24,7 @@ model User {
   role          UserRole
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt     DateTime @updatedAt   @map("updated_at") @db.Timestamp(6)
+  deletedAt     DateTime? @map("deleted_at") @db.Timestamp(6)
 
   restaurantAccess  UserRestaurant[]
   reservations      Reservation[]
