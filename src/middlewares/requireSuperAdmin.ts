@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { UserRole } from "@prisma/client";
+import { ERROR_MESSAGES } from "../constants/messages";
 
 /**
  * Super Admin Authorization Middleware
@@ -15,7 +16,7 @@ export const requireSuperAdmin = (
   next: NextFunction
 ) => {
   if (req.user?.role !== UserRole.super_admin) {
-    return res.status(403).json({ error: "Access denied. Super admin only." });
+    return res.status(403).json({ error: ERROR_MESSAGES.SUPER_ADMIN_ONLY });
   }
   next();
 };

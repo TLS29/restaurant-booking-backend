@@ -4,3 +4,7 @@ node_modules
 
 /generated/prisma
 .DS_Store
+
+# Build output
+dist/
+coverage/

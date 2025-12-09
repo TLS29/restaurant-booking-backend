@@ -3,6 +3,7 @@ import { userRepository } from "../../repositories/prisma/user";
 import { UserRole } from "@prisma/client";
 import { hashPassword } from "../../utils/password";
 import { generateToken } from "../../utils/jwt";
+import { ERROR_MESSAGES } from "../../constants/messages";
 
 /**
  * Register Use Case
@@ -15,7 +16,7 @@ import { generateToken } from "../../utils/jwt";
 export const execute = async (data: RegisterDTO) => {
   const existingUser = await userRepository.findByEmail(data.email);
   if (existingUser) {
-    throw new Error("Email already exists");
+    throw new Error(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
   }
 
   const hashedPassword = await hashPassword(data.password);

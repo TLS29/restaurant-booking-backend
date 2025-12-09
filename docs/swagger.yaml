@@ -14,6 +14,8 @@ servers:
 tags:
   - name: Authentication
     description: User authentication and registration
+  - name: Super Admin
+    description: Super admin operations (create owners, restaurants)
   - name: Restaurants
     description: Restaurant management (coming soon)
   - name: Reservations
@@ -28,9 +30,11 @@ paths:
   /api/auth/login:
     $ref: './auth.yaml#/paths/~1api~1auth~1login'
 
-  # Future endpoints will be added here
-  # /api/restaurants:
-  #   $ref: './restaurants.yaml#/paths/~1api~1restaurants'
+  # Super Admin endpoints
+  /api/super-admin/owners:
+    $ref: './superAdmin.yaml#/paths/~1api~1super-admin~1owners'
+  /api/super-admin/owners/{id}:
+    $ref: './superAdmin.yaml#/paths/~1api~1super-admin~1owners~1{id}'
 
 components:
   schemas:

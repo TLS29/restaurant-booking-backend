@@ -1,7 +1,7 @@
 # 📋 SISTEMA DE RESERVACIONES MULTITENANT - Documento de Contexto
 
-> **Versión:** 4.1
-> **Última actualización:** 2025-11-30
+> **Versión:** 4.2
+> **Última actualización:** 2025-12-01
 > **Autor:** Jonathan García (con mentoría de Claude)
 
 ---
@@ -21,7 +21,7 @@
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  FASE ACTUAL: 2 - Gestión de Restaurantes               │
-│  PASO ACTUAL: 🔄 Endpoint: Super admin crea owner       │
+│  PASO ACTUAL: 🔄 CRUD Owner (listar, detalle, editar)   │
 │  SIGUIENTE:   ⬚ Endpoint: Super admin crea restaurante  │
 └─────────────────────────────────────────────────────────┘
 ```
@@ -35,7 +35,10 @@
 - ✅ Login con JWT
 - ✅ Crear super_admin inicial (vía seed)
 - ✅ Middleware: requireAuth
+- ✅ Middleware: requireSuperAdmin
 - ✅ Owner relation en Restaurant
+- ✅ Endpoint: Super admin crea owner
+- ✅ Domain entity pattern (User class con toPublic())
 
 ---
 
@@ -53,7 +56,7 @@
 | 1.4 | Endpoint: Login con JWT                        | ✅     | —               |
 | 1.5 | Crear super_admin inicial (vía seed)           | ✅     | —               |
 | 1.6 | Middleware: requireAuth                        | ✅     | —               |
-| 1.7 | Middleware: requireSuperAdmin                  | ⬚      | —               |
+| 1.7 | Middleware: requireSuperAdmin                  | ✅     | —               |
 
 ---
 
@@ -61,7 +64,8 @@
 
 | #   | Tarea                                                | Estado | Concepto Senior                    |
 | --- | ---------------------------------------------------- | ------ | ---------------------------------- |
-| 2.1 | Endpoint: Super admin crea restaurante               | ⬚      | —                                  |
+| 2.0 | Endpoint: Super admin crea owner                     | ✅     | **Domain Entity Pattern**          |
+| 2.1 | Endpoint: Super admin crea restaurante               | 🔄     | —                                  |
 | 2.2 | Endpoint: Super admin asigna owner al restaurante    | ⬚      | **Transactions**                   |
 | 2.3 | Endpoint: Owner ve su(s) restaurante(s)              | ⬚      | —                                  |
 | 2.4 | Endpoint: Owner agrega staff (manager, admin, staff) | ⬚      | **Factory Pattern + Transactions** |
@@ -370,19 +374,39 @@ backend/
 | POST   | `/api/auth/login`    | Login              | No                     |
 | GET    | `/api/auth/me`       | Ver mi perfil      | Sí (cualquier usuario) |
 
-### Super Admin
+### Super Admin - Owners
+
+| Método | Endpoint                              | Descripción                  | Auth requerido |
+| ------ | ------------------------------------- | ---------------------------- | -------------- |
+| POST   | `/api/super-admin/owners`             | Crear owner                  | super_admin    |
+| GET    | `/api/super-admin/owners`             | Listar owners (con paginación) | super_admin    |
+| GET    | `/api/super-admin/owners/:id`         | Ver detalle de owner         | super_admin    |
+| PATCH  | `/api/super-admin/owners/:id`         | Editar datos básicos         | super_admin    |
+| PATCH  | `/api/super-admin/owners/:id/deactivate` | Desactivar owner (soft delete) | super_admin    |
+
+> **Nota sobre desactivar owner:** No se puede desactivar un owner que tenga restaurantes activos. Primero se deben reasignar o desactivar sus restaurantes.
+
+### Super Admin - Restaurants
 
 | Método | Endpoint                                        | Descripción                | Auth requerido |
 | ------ | ----------------------------------------------- | -------------------------- | -------------- |
 | POST   | `/api/super-admin/restaurants`                  | Crear restaurante          | super_admin    |
 | GET    | `/api/super-admin/restaurants`                  | Ver todos los restaurantes | super_admin    |
+| GET    | `/api/super-admin/restaurants/:id`              | Ver detalle de restaurante | super_admin    |
+| PATCH  | `/api/super-admin/restaurants/:id`              | Editar restaurante         | super_admin    |
+| PATCH  | `/api/super-admin/restaurants/:id/deactivate`   | Desactivar restaurante     | super_admin    |
 | POST   | `/api/super-admin/restaurants/:id/assign-owner` | Asignar owner              | super_admin    |
+
+> **Nota sobre desactivar restaurante:** Cancela reservaciones futuras pendientes antes de desactivar.
+
+> **TODO - Horario semanal:** Cambiar `openingTime/closingTime` por tabla `restaurant_schedules` con horario por día (lunes-domingo). Permite configurar días cerrados (ej: domingos) y horarios diferentes por día.
 
 ### Admin/Staff (requieren acceso al restaurante)
 
-| Método | Endpoint                                   | Descripción           | Auth requerido |
-| ------ | ------------------------------------------ | --------------------- | -------------- |
-| GET    | `/api/admin/restaurants`                   | Ver mis restaurantes  | staff+         |
+| Método | Endpoint                                   | Descripción              | Auth requerido |
+| ------ | ------------------------------------------ | ------------------------ | -------------- |
+| GET    | `/api/admin/restaurants`                   | Ver mis restaurantes     | staff+         |
+| PATCH  | `/api/admin/restaurants/:id/toggle-status` | Abrir/cerrar temporalmente | owner+         |
 | GET    | `/api/admin/restaurants/:id/reservations`  | Ver reservaciones     | staff+         |
 | PATCH  | `/api/admin/reservations/:id/confirm`      | Confirmar reservación | staff+         |
 | PATCH  | `/api/admin/reservations/:id/reject`       | Rechazar reservación  | staff+         |
@@ -500,11 +524,77 @@ if (!hasAccess) {
 
 ## 📝 HISTORIAL DE SESIONES
 
-| Fecha      | Qué se hizo                               | Siguiente paso              |
-| ---------- | ----------------------------------------- | --------------------------- |
-| 2025-11-22 | Setup inicial, schema Prisma, migraciones | Registro/Login              |
-| 2025-11-23 | Registro customer, Login JWT              | Crear super_admin (seed)    |
-| 2025-11-30 | Seed super_admin, requireAuth middleware  | Endpoint: crear owner       |
+| Fecha      | Qué se hizo                                          | Siguiente paso              |
+| ---------- | ---------------------------------------------------- | --------------------------- |
+| 2025-11-22 | Setup inicial, schema Prisma, migraciones            | Registro/Login              |
+| 2025-11-23 | Registro customer, Login JWT                         | Crear super_admin (seed)    |
+| 2025-11-30 | Seed super_admin, requireAuth middleware             | Endpoint: crear owner       |
+| 2025-12-01 | Endpoint crear owner, requireSuperAdmin, Domain Entity | Endpoint: crear restaurante |
+
+---
+
+## 🏛️ Arquitectura y Principios
+
+### Clean Architecture
+
+Este proyecto sigue **Clean Architecture** (Uncle Bob). Las capas de adentro hacia afuera:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      Frameworks & Drivers                    │
+│  (Express, Prisma, JWT, Bcrypt)                             │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │              Interface Adapters                      │    │
+│  │  (Controllers, Middlewares, Repositories Impl)       │    │
+│  │  ┌─────────────────────────────────────────────┐    │    │
+│  │  │            Application Layer                 │    │    │
+│  │  │  (Use Cases - lógica de negocio)            │    │    │
+│  │  │  ┌─────────────────────────────────────┐    │    │    │
+│  │  │  │         Domain Layer                 │    │    │    │
+│  │  │  │  (Entities - User, Restaurant, etc)  │    │    │    │
+│  │  │  └─────────────────────────────────────┘    │    │    │
+│  │  └─────────────────────────────────────────────┘    │    │
+│  └─────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Regla de dependencia:** Las capas internas NO conocen las externas. Un Use Case depende de una interfaz (`IUserRepository`), no de Prisma.
+
+### Principios SOLID
+
+| Principio | Aplicación en este proyecto |
+|-----------|----------------------------|
+| **S**ingle Responsibility | Cada use case hace una sola cosa (`CreateOwner`, `GetOwnerById`) |
+| **O**pen/Closed | Agregar nuevo repositorio (MongoDB) sin cambiar use cases |
+| **L**iskov Substitution | `PrismaUserRepository` puede reemplazar `IUserRepository` |
+| **I**nterface Segregation | Interfaces pequeñas por dominio (`IUserRepository`, `IRestaurantRepository`) |
+| **D**ependency Inversion | Use cases reciben repositorios via constructor (DI) |
+
+### Inyección de Dependencias (DI)
+
+Los use cases reciben sus dependencias en el constructor:
+
+```typescript
+// ✅ CORRECTO - Use case recibe dependencia
+export class GetOwnerById {
+  constructor(private readonly userRepository: IUserRepository) {}
+
+  async execute(id: string) {
+    return this.userRepository.findById(id);
+  }
+}
+
+// ❌ INCORRECTO - Use case importa implementación directamente
+import { userRepository } from "../repositories/prisma/user";
+export const execute = async (id: string) => {
+  return userRepository.findById(id);
+};
+```
+
+**Beneficios:**
+- Testeable: En tests pasas un mock, en producción pasas Prisma
+- Desacoplado: Cambiar de Prisma a otro ORM no afecta los use cases
+- Explícito: Queda claro qué dependencias tiene cada use case
 
 ---
 
@@ -517,7 +607,14 @@ if (!hasAccess) {
 
 ---
 
-> **Versión:** 4.1
+> **Versión:** 4.2
+> **Cambios v4.2:**
+>
+> - Fase 1 completada (todos los middlewares de auth)
+> - Agregado endpoint POST /api/super-admin/owners
+> - Implementado Domain Entity Pattern (User class con toPublic())
+> - Swagger docs actualizados para super-admin
+>
 > **Cambios v4.1:**
 >
 > - Actualizado UserRole enum: ahora incluye `owner` como rol global

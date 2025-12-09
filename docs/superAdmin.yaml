@@ -1,0 +1,455 @@
+paths:
+  /api/super-admin/owners/{id}:
+    get:
+      tags:
+        - Super Admin
+      summary: Get owner by ID
+      description: |
+        Returns a single owner's details by their unique identifier.
+        Only super_admin users can access this endpoint.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Owner's unique identifier
+      responses:
+        '200':
+          description: Owner details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetOwnerResponse'
+        '400':
+          description: Owner not found
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '401':
+          description: No token provided or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '403':
+          description: Access denied - Super admin only
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+    patch:
+      tags:
+        - Super Admin
+      summary: Update an owner
+      description: |
+        Updates an existing owner's basic information (firstName, lastName, phone).
+        Only super_admin users can access this endpoint.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Owner's unique identifier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOwnerRequest'
+      responses:
+        '200':
+          description: Owner updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateOwnerResponse'
+        '400':
+          description: Validation error or owner not found
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: './schemas/errors.yaml#/components/schemas/ValidationError'
+                  - $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '401':
+          description: No token provided or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '403':
+          description: Access denied - Super admin only
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+    delete:
+      tags:
+        - Super Admin
+      summary: Deactivate an owner
+      description: |
+        Soft deletes an owner by setting their deletedAt timestamp.
+        The owner account will be deactivated but data is preserved.
+        Only super_admin users can access this endpoint.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Owner's unique identifier
+      responses:
+        '200':
+          description: Owner deactivated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeactivateOwnerResponse'
+        '400':
+          description: Owner not found
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '401':
+          description: No token provided or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '403':
+          description: Access denied - Super admin only
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+
+  /api/super-admin/owners:
+    get:
+      tags:
+        - Super Admin
+      summary: List all restaurant owners
+      description: |
+        Returns a paginated list of all owners.
+        Only super_admin users can access this endpoint.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Page number
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+          description: Number of items per page
+      responses:
+        '200':
+          description: List of owners with pagination info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListOwnersResponse'
+        '401':
+          description: No token provided or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '403':
+          description: Access denied - Super admin only
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+    post:
+      tags:
+        - Super Admin
+      summary: Create a new restaurant owner
+      description: |
+        Creates a new user account with owner role.
+        Only super_admin users can access this endpoint.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOwnerRequest'
+      responses:
+        '201':
+          description: Owner created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateOwnerResponse'
+        '400':
+          description: Validation error or email already exists
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: './schemas/errors.yaml#/components/schemas/ValidationError'
+                  - $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '401':
+          description: No token provided or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '403':
+          description: Access denied - Super admin only
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+
+components:
+  schemas:
+    CreateOwnerRequest:
+      type: object
+      required:
+        - email
+        - password
+        - firstName
+        - lastName
+        - phone
+      properties:
+        email:
+          type: string
+          format: email
+          description: Owner email address
+          example: owner@restaurant.com
+        password:
+          type: string
+          minLength: 8
+          description: Owner password (minimum 8 characters)
+          example: securePass123
+        firstName:
+          type: string
+          minLength: 1
+          description: Owner first name
+          example: Carlos
+        lastName:
+          type: string
+          minLength: 1
+          description: Owner last name
+          example: García
+        phone:
+          type: string
+          minLength: 10
+          description: Owner phone number (minimum 10 digits)
+          example: "5551234567"
+
+    ListOwnersResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/OwnerPublic'
+        pagination:
+          type: object
+          properties:
+            page:
+              type: integer
+              example: 1
+            limit:
+              type: integer
+              example: 10
+            total:
+              type: integer
+              example: 25
+            totalPages:
+              type: integer
+              example: 3
+
+    OwnerPublic:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        email:
+          type: string
+          format: email
+          example: owner@restaurant.com
+        firstName:
+          type: string
+          example: Carlos
+        lastName:
+          type: string
+          example: García
+        phone:
+          type: string
+          example: "5551234567"
+        role:
+          type: string
+          enum: [owner]
+          example: owner
+        createdAt:
+          type: string
+          format: date-time
+          example: 2025-01-15T10:30:00Z
+        updatedAt:
+          type: string
+          format: date-time
+          example: 2025-01-15T10:30:00Z
+
+    GetOwnerResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        email:
+          type: string
+          format: email
+          example: owner@restaurant.com
+        firstName:
+          type: string
+          example: Carlos
+        lastName:
+          type: string
+          example: García
+        phone:
+          type: string
+          example: "5551234567"
+        role:
+          type: string
+          enum: [owner]
+          example: owner
+        createdAt:
+          type: string
+          format: date-time
+          example: 2025-01-15T10:30:00Z
+        updatedAt:
+          type: string
+          format: date-time
+          example: 2025-01-15T10:30:00Z
+
+    UpdateOwnerRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          description: Owner first name
+          example: Carlos
+        lastName:
+          type: string
+          minLength: 1
+          description: Owner last name
+          example: García
+        phone:
+          type: string
+          minLength: 10
+          description: Owner phone number (minimum 10 digits)
+          example: "5551234567"
+
+    UpdateOwnerResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Owner updated successfully
+        data:
+          $ref: '#/components/schemas/OwnerPublic'
+
+    DeactivateOwnerResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Owner deactivated successfully
+
+    CreateOwnerResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Owner created successfully
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              example: 550e8400-e29b-41d4-a716-446655440000
+            email:
+              type: string
+              format: email
+              example: owner@restaurant.com
+            firstName:
+              type: string
+              example: Carlos
+            lastName:
+              type: string
+              example: García
+            phone:
+              type: string
+              example: "5551234567"
+            role:
+              type: string
+              enum: [owner]
+              example: owner
+            createdAt:
+              type: string
+              format: date-time
+              example: 2025-01-15T10:30:00Z
+            updatedAt:
+              type: string
+              format: date-time
+              example: 2025-01-15T10:30:00Z

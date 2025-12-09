@@ -28,7 +28,7 @@ components:
           example: "+1234567890"
         role:
           type: string
-          enum: [customer, super_admin]
+          enum: [customer, owner, super_admin]
           description: User role in the system
           example: customer
         createdAt:
