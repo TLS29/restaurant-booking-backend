@@ -1,7 +1,7 @@
 # 📋 SISTEMA DE RESERVACIONES MULTITENANT - Documento de Contexto
 
-> **Versión:** 4.2
-> **Última actualización:** 2025-12-01
+> **Versión:** 4.3
+> **Última actualización:** 2025-12-09
 > **Autor:** Jonathan García (con mentoría de Claude)
 
 ---
@@ -21,8 +21,8 @@
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  FASE ACTUAL: 2 - Gestión de Restaurantes               │
-│  PASO ACTUAL: 🔄 CRUD Owner (listar, detalle, editar)   │
-│  SIGUIENTE:   ⬚ Endpoint: Super admin crea restaurante  │
+│  PASO ACTUAL: 🔄 CRUD Restaurant (por Owner)            │
+│  SIGUIENTE:   ⬚ Owner agrega staff                      │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -39,6 +39,10 @@
 - ✅ Owner relation en Restaurant
 - ✅ Endpoint: Super admin crea owner
 - ✅ Domain entity pattern (User class con toPublic())
+- ✅ CRUD completo de Owners (list, getById, update, deactivate)
+- ✅ Refactor use cases a patrón DI (Dependency Injection)
+- ✅ Setup Jest para unit tests
+- ✅ Unit tests para owners use cases (100% coverage)
 
 ---
 
@@ -64,21 +68,17 @@
 
 | #   | Tarea                                                | Estado | Concepto Senior                    |
 | --- | ---------------------------------------------------- | ------ | ---------------------------------- |
-| 2.0 | Endpoint: Super admin crea owner                     | ✅     | **Domain Entity Pattern**          |
-| 2.1 | Endpoint: Super admin crea restaurante               | 🔄     | —                                  |
-| 2.2 | Endpoint: Super admin asigna owner al restaurante    | ⬚      | **Transactions**                   |
-| 2.3 | Endpoint: Owner ve su(s) restaurante(s)              | ⬚      | —                                  |
-| 2.4 | Endpoint: Owner agrega staff (manager, admin, staff) | ⬚      | **Factory Pattern + Transactions** |
-| 2.5 | Middleware: requireRestaurantAccess                  | ⬚      | —                                  |
-| 2.6 | Middleware: requireStaffRole (verificar rol mínimo)  | ⬚      | **Strategy Pattern**               |
+| 2.0 | CRUD Owners (super_admin crea/gestiona owners)       | ✅     | **Domain Entity Pattern + DI**     |
+| 2.1 | CRUD Restaurants (owner crea/gestiona sus restaurantes) | 🔄  | —                                  |
+| 2.2 | Endpoint: Owner agrega staff (manager, staff)        | ⬚      | **Factory Pattern + Transactions** |
+| 2.3 | Middleware: requireOwner                             | ⬚      | —                                  |
+| 2.4 | Middleware: requireRestaurantAccess                  | ⬚      | —                                  |
+| 2.5 | Middleware: requireStaffRole (verificar rol mínimo)  | ⬚      | **Strategy Pattern**               |
 
-> 💡 **Nota sobre Transactions (2.2):**  
-> Cuando lleguemos aquí, Claude debe explicar: "Una Transaction garantiza que múltiples operaciones de DB se ejecuten como una unidad atómica — o todas pasan, o ninguna. Aquí lo usamos porque crear restaurante + asignar owner deben ser una sola operación. Si falla asignar owner, el restaurante no debe quedar creado."
+> 💡 **Nota sobre Factory Pattern + Transactions (2.2):**
+> Cuando lleguemos aquí, Claude debe explicar: "Factory Pattern encapsula la lógica de creación de objetos. Aquí lo usamos para crear diferentes tipos de staff (manager, staff) con validaciones específicas. Transaction garantiza que crear usuario + asignar a restaurante sea atómico."
 
-> 💡 **Nota sobre Factory Pattern (2.4):**  
-> Cuando lleguemos aquí, Claude debe explicar: "Factory Pattern es un patrón creacional que encapsula la lógica de creación de objetos. Aquí lo usamos para crear diferentes tipos de staff (owner, manager, admin, staff) con validaciones específicas para cada uno. Por ejemplo, solo puede haber un owner por restaurante."
-
-> 💡 **Nota sobre Strategy Pattern (2.6):**  
+> 💡 **Nota sobre Strategy Pattern (2.5):**
 > Cuando lleguemos aquí, Claude debe explicar: "Strategy Pattern permite cambiar el comportamiento de un algoritmo en runtime. Aquí lo usamos para tener diferentes estrategias de verificación de permisos según el rol requerido por cada endpoint."
 
 ---
@@ -386,18 +386,17 @@ backend/
 
 > **Nota sobre desactivar owner:** No se puede desactivar un owner que tenga restaurantes activos. Primero se deben reasignar o desactivar sus restaurantes.
 
-### Super Admin - Restaurants
+### Owner - Restaurants (Owner gestiona sus propios restaurantes)
 
-| Método | Endpoint                                        | Descripción                | Auth requerido |
-| ------ | ----------------------------------------------- | -------------------------- | -------------- |
-| POST   | `/api/super-admin/restaurants`                  | Crear restaurante          | super_admin    |
-| GET    | `/api/super-admin/restaurants`                  | Ver todos los restaurantes | super_admin    |
-| GET    | `/api/super-admin/restaurants/:id`              | Ver detalle de restaurante | super_admin    |
-| PATCH  | `/api/super-admin/restaurants/:id`              | Editar restaurante         | super_admin    |
-| PATCH  | `/api/super-admin/restaurants/:id/deactivate`   | Desactivar restaurante     | super_admin    |
-| POST   | `/api/super-admin/restaurants/:id/assign-owner` | Asignar owner              | super_admin    |
+| Método | Endpoint                                   | Descripción                   | Auth requerido |
+| ------ | ------------------------------------------ | ----------------------------- | -------------- |
+| POST   | `/api/owner/restaurants`                   | Crear mi restaurante          | owner          |
+| GET    | `/api/owner/restaurants`                   | Ver mis restaurantes          | owner          |
+| GET    | `/api/owner/restaurants/:id`               | Ver detalle de mi restaurante | owner          |
+| PATCH  | `/api/owner/restaurants/:id`               | Editar mi restaurante         | owner          |
+| PATCH  | `/api/owner/restaurants/:id/deactivate`    | Desactivar mi restaurante     | owner          |
 
-> **Nota sobre desactivar restaurante:** Cancela reservaciones futuras pendientes antes de desactivar.
+> **Nota:** Owner solo puede ver/editar sus propios restaurantes (filtrado por `ownerId`).
 
 > **TODO - Horario semanal:** Cambiar `openingTime/closingTime` por tabla `restaurant_schedules` con horario por día (lunes-domingo). Permite configurar días cerrados (ej: domingos) y horarios diferentes por día.
 
@@ -529,7 +528,8 @@ if (!hasAccess) {
 | 2025-11-22 | Setup inicial, schema Prisma, migraciones            | Registro/Login              |
 | 2025-11-23 | Registro customer, Login JWT                         | Crear super_admin (seed)    |
 | 2025-11-30 | Seed super_admin, requireAuth middleware             | Endpoint: crear owner       |
-| 2025-12-01 | Endpoint crear owner, requireSuperAdmin, Domain Entity | Endpoint: crear restaurante |
+| 2025-12-01 | Endpoint crear owner, requireSuperAdmin, Domain Entity | CRUD owners completo      |
+| 2025-12-08 | CRUD owners completo, refactor DI, Jest setup, unit tests | CRUD restaurants        |
 
 ---
 
@@ -607,7 +607,15 @@ export const execute = async (id: string) => {
 
 ---
 
-> **Versión:** 4.2
+> **Versión:** 4.3
+> **Cambios v4.3:**
+>
+> - CRUD completo de Owners (list, getById, update, deactivate)
+> - Refactor de use cases a patrón DI (Dependency Injection)
+> - Setup Jest para unit testing
+> - Unit tests para todos los use cases de owners (100% coverage)
+> - Documentación de arquitectura Clean Architecture y SOLID
+>
 > **Cambios v4.2:**
 >
 > - Fase 1 completada (todos los middlewares de auth)
