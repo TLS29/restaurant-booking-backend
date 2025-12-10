@@ -1,7 +1,7 @@
 # 📋 SISTEMA DE RESERVACIONES MULTITENANT - Documento de Contexto
 
-> **Versión:** 4.2
-> **Última actualización:** 2025-12-01
+> **Versión:** 4.4
+> **Última actualización:** 2025-12-09
 > **Autor:** Jonathan García (con mentoría de Claude)
 
 ---
@@ -13,6 +13,8 @@
 3. **Respuestas cortas y simples** — si necesito más detalle, pregunto
 4. **Cuando toquemos un CONCEPTO DE SENIOR**, explícame brevemente qué es y por qué lo usamos aquí
 5. **Seguir el flujo de desarrollo** — no saltar pasos
+6. **Unit tests obligatorios** — cada feature debe tener tests, coverage mínimo 95%
+7. **Soft delete en queries** — filtrar `deletedAt` automáticamente en todos los queries
 
 ---
 
@@ -21,8 +23,8 @@
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  FASE ACTUAL: 2 - Gestión de Restaurantes               │
-│  PASO ACTUAL: 🔄 CRUD Owner (listar, detalle, editar)   │
-│  SIGUIENTE:   ⬚ Endpoint: Super admin crea restaurante  │
+│  PASO ACTUAL: 🔄 CRUD Restaurant (por Owner)            │
+│  SIGUIENTE:   ⬚ Owner agrega staff                      │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -39,6 +41,10 @@
 - ✅ Owner relation en Restaurant
 - ✅ Endpoint: Super admin crea owner
 - ✅ Domain entity pattern (User class con toPublic())
+- ✅ CRUD completo de Owners (list, getById, update, deactivate)
+- ✅ Refactor use cases a patrón DI (Dependency Injection)
+- ✅ Setup Jest para unit tests
+- ✅ Unit tests para owners use cases (100% coverage)
 
 ---
 
@@ -64,21 +70,17 @@
 
 | #   | Tarea                                                | Estado | Concepto Senior                    |
 | --- | ---------------------------------------------------- | ------ | ---------------------------------- |
-| 2.0 | Endpoint: Super admin crea owner                     | ✅     | **Domain Entity Pattern**          |
-| 2.1 | Endpoint: Super admin crea restaurante               | 🔄     | —                                  |
-| 2.2 | Endpoint: Super admin asigna owner al restaurante    | ⬚      | **Transactions**                   |
-| 2.3 | Endpoint: Owner ve su(s) restaurante(s)              | ⬚      | —                                  |
-| 2.4 | Endpoint: Owner agrega staff (manager, admin, staff) | ⬚      | **Factory Pattern + Transactions** |
-| 2.5 | Middleware: requireRestaurantAccess                  | ⬚      | —                                  |
-| 2.6 | Middleware: requireStaffRole (verificar rol mínimo)  | ⬚      | **Strategy Pattern**               |
+| 2.0 | CRUD Owners (super_admin crea/gestiona owners)       | ✅     | **Domain Entity Pattern + DI**     |
+| 2.1 | CRUD Restaurants (owner crea/gestiona sus restaurantes) | 🔄  | —                                  |
+| 2.2 | Endpoint: Owner agrega staff (manager, staff)        | ⬚      | **Factory Pattern + Transactions** |
+| 2.3 | Middleware: requireOwner                             | ⬚      | —                                  |
+| 2.4 | Middleware: requireRestaurantAccess                  | ⬚      | —                                  |
+| 2.5 | Middleware: requireStaffRole (verificar rol mínimo)  | ⬚      | **Strategy Pattern**               |
 
-> 💡 **Nota sobre Transactions (2.2):**  
-> Cuando lleguemos aquí, Claude debe explicar: "Una Transaction garantiza que múltiples operaciones de DB se ejecuten como una unidad atómica — o todas pasan, o ninguna. Aquí lo usamos porque crear restaurante + asignar owner deben ser una sola operación. Si falla asignar owner, el restaurante no debe quedar creado."
+> 💡 **Nota sobre Factory Pattern + Transactions (2.2):**
+> Cuando lleguemos aquí, Claude debe explicar: "Factory Pattern encapsula la lógica de creación de objetos. Aquí lo usamos para crear diferentes tipos de staff (manager, staff) con validaciones específicas. Transaction garantiza que crear usuario + asignar a restaurante sea atómico."
 
-> 💡 **Nota sobre Factory Pattern (2.4):**  
-> Cuando lleguemos aquí, Claude debe explicar: "Factory Pattern es un patrón creacional que encapsula la lógica de creación de objetos. Aquí lo usamos para crear diferentes tipos de staff (owner, manager, admin, staff) con validaciones específicas para cada uno. Por ejemplo, solo puede haber un owner por restaurante."
-
-> 💡 **Nota sobre Strategy Pattern (2.6):**  
+> 💡 **Nota sobre Strategy Pattern (2.5):**
 > Cuando lleguemos aquí, Claude debe explicar: "Strategy Pattern permite cambiar el comportamiento de un algoritmo en runtime. Aquí lo usamos para tener diferentes estrategias de verificación de permisos según el rol requerido por cada endpoint."
 
 ---
@@ -128,16 +130,43 @@
 | 5.1 | Cache de disponibilidad   | ⬚      | **LRU Cache**          |
 | 5.2 | Sistema de notificaciones | ⬚      | **Observer Pattern**   |
 | 5.3 | Cola de procesamiento     | ⬚      | **Queue (Bull/Redis)** |
-| 5.4 | Logs y auditoría          | ⬚      | —                      |
+| 5.4 | Logs y auditoría          | ⬚      | **Audit Log**          |
 
-> 💡 **Nota sobre LRU Cache (5.1):**  
+> 💡 **Nota sobre LRU Cache (5.1):**
 > Cuando lleguemos aquí, Claude debe explicar: "LRU (Least Recently Used) Cache guarda en memoria los datos más accedidos recientemente. Cuando el cache se llena, elimina automáticamente los menos usados. Aquí cacheamos disponibilidad de mesas para no consultar la DB en cada request."
 
-> 💡 **Nota sobre Observer Pattern (5.2):**  
+> 💡 **Nota sobre Observer Pattern (5.2):**
 > Cuando lleguemos aquí, Claude debe explicar: "Observer Pattern permite que múltiples 'observadores' reaccionen automáticamente cuando ocurre un evento. Cuando una reservación cambia de estado, podemos notificar al cliente por email, actualizar estadísticas, y enviar push notification al restaurante — todo sin acoplar esa lógica."
 
-> 💡 **Nota sobre Queue (5.3):**  
+> 💡 **Nota sobre Queue (5.3):**
 > Cuando lleguemos aquí, Claude debe explicar: "Una Queue (cola) procesa tareas en orden y de forma asíncrona. El usuario no espera mientras enviamos emails o procesamos pagos — esas tareas van a la cola y se procesan en background."
+
+> 💡 **Nota sobre Audit Log (5.4):**
+> Cuando lleguemos aquí, Claude debe explicar: "Un Audit Log registra quién hizo qué cambio y cuándo. Es crítico para compliance, debugging y seguridad. Guardamos: usuario, acción, entidad afectada, valores anteriores/nuevos, timestamp e IP."
+
+---
+
+### FASE 6: Seguridad y Calidad
+
+| #   | Tarea                              | Estado | Concepto Senior              |
+| --- | ---------------------------------- | ------ | ---------------------------- |
+| 6.1 | Rate Limiting                      | ⬚      | **Throttling/Token Bucket**  |
+| 6.2 | Error Handling centralizado        | ⬚      | **Custom Error Classes**     |
+| 6.3 | Cursor-based pagination            | ⬚      | **Cursor Pagination**        |
+| 6.4 | Integration tests con test DB      | ⬚      | **Test Containers/DB Reset** |
+| 6.5 | Completar coverage 95%+            | ⬚      | —                            |
+
+> 💡 **Nota sobre Rate Limiting (6.1):**
+> Cuando lleguemos aquí, Claude debe explicar: "Rate Limiting protege la API de abuso limitando requests por IP/usuario. Token Bucket permite ráfagas cortas pero mantiene un promedio. Ej: 100 requests/minuto con burst de 20."
+
+> 💡 **Nota sobre Custom Error Classes (6.2):**
+> Cuando lleguemos aquí, Claude debe explicar: "Custom Errors permiten manejar errores de forma consistente. Cada error tiene: código HTTP, código interno, mensaje user-friendly. El middleware centralizado los captura y formatea la respuesta."
+
+> 💡 **Nota sobre Cursor Pagination (6.3):**
+> Cuando lleguemos aquí, Claude debe explicar: "Cursor pagination usa el ID del último elemento como 'cursor' en vez de offset. Es más eficiente en datasets grandes porque no recalcula posiciones. Ideal para feeds infinitos o datos que cambian frecuentemente."
+
+> 💡 **Nota sobre Integration Tests (6.4):**
+> Cuando lleguemos aquí, Claude debe explicar: "Integration tests prueban capas juntas con DB real. Usamos test containers o DB separada que se resetea entre tests. Valida que repository + DB + use case funcionen correctamente juntos."
 
 ---
 
@@ -386,18 +415,17 @@ backend/
 
 > **Nota sobre desactivar owner:** No se puede desactivar un owner que tenga restaurantes activos. Primero se deben reasignar o desactivar sus restaurantes.
 
-### Super Admin - Restaurants
+### Owner - Restaurants (Owner gestiona sus propios restaurantes)
 
-| Método | Endpoint                                        | Descripción                | Auth requerido |
-| ------ | ----------------------------------------------- | -------------------------- | -------------- |
-| POST   | `/api/super-admin/restaurants`                  | Crear restaurante          | super_admin    |
-| GET    | `/api/super-admin/restaurants`                  | Ver todos los restaurantes | super_admin    |
-| GET    | `/api/super-admin/restaurants/:id`              | Ver detalle de restaurante | super_admin    |
-| PATCH  | `/api/super-admin/restaurants/:id`              | Editar restaurante         | super_admin    |
-| PATCH  | `/api/super-admin/restaurants/:id/deactivate`   | Desactivar restaurante     | super_admin    |
-| POST   | `/api/super-admin/restaurants/:id/assign-owner` | Asignar owner              | super_admin    |
+| Método | Endpoint                                   | Descripción                   | Auth requerido |
+| ------ | ------------------------------------------ | ----------------------------- | -------------- |
+| POST   | `/api/owner/restaurants`                   | Crear mi restaurante          | owner          |
+| GET    | `/api/owner/restaurants`                   | Ver mis restaurantes          | owner          |
+| GET    | `/api/owner/restaurants/:id`               | Ver detalle de mi restaurante | owner          |
+| PATCH  | `/api/owner/restaurants/:id`               | Editar mi restaurante         | owner          |
+| PATCH  | `/api/owner/restaurants/:id/deactivate`    | Desactivar mi restaurante     | owner          |
 
-> **Nota sobre desactivar restaurante:** Cancela reservaciones futuras pendientes antes de desactivar.
+> **Nota:** Owner solo puede ver/editar sus propios restaurantes (filtrado por `ownerId`).
 
 > **TODO - Horario semanal:** Cambiar `openingTime/closingTime` por tabla `restaurant_schedules` con horario por día (lunes-domingo). Permite configurar días cerrados (ej: domingos) y horarios diferentes por día.
 
@@ -486,6 +514,7 @@ if (!hasAccess) {
 
 | Concepto               | Qué es (1 línea)                                    | Dónde se usa                       |
 | ---------------------- | --------------------------------------------------- | ---------------------------------- |
+| **Domain Entity + DI** | Entidades puras + inyección de dependencias         | User, Restaurant (ya implementado) |
 | **Factory Pattern**    | Encapsula creación de objetos con lógica específica | Crear diferentes tipos de staff    |
 | **Strategy Pattern**   | Intercambiar algoritmos/comportamientos en runtime  | Verificación de permisos por rol   |
 | **Observer Pattern**   | Múltiples "observadores" reaccionan a eventos       | Notificaciones al cambiar estado   |
@@ -496,6 +525,12 @@ if (!hasAccess) {
 | **Greedy Algorithm**   | Mejor decisión local en cada paso                   | Asignar mesa óptima por capacidad  |
 | **LRU Cache**          | Cache que elimina los menos usados recientemente    | Cachear disponibilidad             |
 | **Queue**              | Procesar tareas en orden y async                    | Enviar emails/notificaciones       |
+| **Audit Log**          | Registrar quién hizo qué cambio y cuándo            | Historial de cambios               |
+| **Rate Limiting**      | Limitar requests por IP/usuario                     | Proteger API de abuso              |
+| **Custom Errors**      | Clases de error con códigos consistentes            | Manejo centralizado de errores     |
+| **Cursor Pagination**  | Paginación por cursor en vez de offset              | Datasets grandes                   |
+| **Unit Testing 95%+**  | Tests unitarios con alta cobertura                  | Todos los use cases                |
+| **Integration Tests**  | Tests con DB real                                   | Validar capas juntas               |
 
 ---
 
@@ -529,7 +564,8 @@ if (!hasAccess) {
 | 2025-11-22 | Setup inicial, schema Prisma, migraciones            | Registro/Login              |
 | 2025-11-23 | Registro customer, Login JWT                         | Crear super_admin (seed)    |
 | 2025-11-30 | Seed super_admin, requireAuth middleware             | Endpoint: crear owner       |
-| 2025-12-01 | Endpoint crear owner, requireSuperAdmin, Domain Entity | Endpoint: crear restaurante |
+| 2025-12-01 | Endpoint crear owner, requireSuperAdmin, Domain Entity | CRUD owners completo      |
+| 2025-12-08 | CRUD owners completo, refactor DI, Jest setup, unit tests | CRUD restaurants        |
 
 ---
 
@@ -607,7 +643,23 @@ export const execute = async (id: string) => {
 
 ---
 
-> **Versión:** 4.2
+> **Versión:** 4.4
+> **Cambios v4.4:**
+>
+> - Agregada regla: unit tests obligatorios, coverage mínimo 95%
+> - Agregada regla: soft delete en queries (filtrar deletedAt)
+> - Nueva Fase 6: Seguridad y Calidad (Rate Limiting, Custom Errors, Cursor Pagination, Integration Tests)
+> - Actualizada tabla de conceptos senior con nuevos items
+> - Audit Log agregado a Fase 5.4
+>
+> **Cambios v4.3:**
+>
+> - CRUD completo de Owners (list, getById, update, deactivate)
+> - Refactor de use cases a patrón DI (Dependency Injection)
+> - Setup Jest para unit testing
+> - Unit tests para todos los use cases de owners (100% coverage)
+> - Documentación de arquitectura Clean Architecture y SOLID
+>
 > **Cambios v4.2:**
 >
 > - Fase 1 completada (todos los middlewares de auth)

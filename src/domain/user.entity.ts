@@ -19,34 +19,6 @@ export class User {
   ) {}
 
   /**
-   * Returns user's full name
-   */
-  get fullName(): string {
-    return `${this.firstName} ${this.lastName}`;
-  }
-
-  /**
-   * Checks if user is an owner
-   */
-  isOwner(): boolean {
-    return this.role === "owner";
-  }
-
-  /**
-   * Checks if user is a super admin
-   */
-  isSuperAdmin(): boolean {
-    return this.role === "super_admin";
-  }
-
-  /**
-   * Checks if user can manage restaurants (owner or super_admin)
-   */
-  canManageRestaurants(): boolean {
-    return this.isOwner() || this.isSuperAdmin();
-  }
-
-  /**
    * Returns user data without sensitive fields (for API responses)
    */
   toPublic() {

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { registerSchema, loginSchema } from "../dto/auth";
-import * as Register from "../use-cases/auth/register";
-import * as Login from "../use-cases/auth/login";
+import { register as registerUseCase } from "../use-cases/auth/register";
+import { login as loginUseCase } from "../use-cases/auth/login";
 import { z } from "zod";
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../constants/messages";
 
@@ -20,7 +20,7 @@ import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../constants/messages";
 export const register = async (req: Request, res: Response) => {
   try {
     const validatedData = registerSchema.parse(req.body);
-    const result = await Register.execute(validatedData);
+    const result = await registerUseCase.execute(validatedData);
     res.status(201).json({
       message: SUCCESS_MESSAGES.USER_REGISTERED,
       data: result,
@@ -60,7 +60,7 @@ export const register = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
   try {
     const validatedData = loginSchema.parse(req.body);
-    const result = await Login.execute(validatedData);
+    const result = await loginUseCase.execute(validatedData);
     res.status(200).json({
       message: SUCCESS_MESSAGES.USER_LOGGED_IN,
       data: result,
