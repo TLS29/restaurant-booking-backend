@@ -60,8 +60,8 @@ export class UserRepositoryPrisma implements IUserRepository {
    * Finds a user by email address
    */
   async findByEmail(email: string): Promise<User | null> {
-    const user = await prisma.user.findUnique({
-      where: { email },
+    const user = await prisma.user.findFirst({
+      where: { email, deletedAt: null },
     });
 
     return user ? toDomain(user) : null;
@@ -71,8 +71,8 @@ export class UserRepositoryPrisma implements IUserRepository {
    * Finds a user by ID
    */
   async findById(id: string): Promise<User | null> {
-    const user = await prisma.user.findUnique({
-      where: { id },
+    const user = await prisma.user.findFirst({
+      where: { id, deletedAt: null },
     });
 
     return user ? toDomain(user) : null;
