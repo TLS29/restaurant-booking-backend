@@ -5,12 +5,12 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js" // ARREGLADO: Cambiado a prisma-client-js (estándar) y eliminado output custom
+  provider = "prisma-client-js" // FIXED: Changed to prisma-client-js (standard) and removed custom output
 }
 
 datasource db {
   provider = "postgresql"
-  // ✅ En Prisma 7, la URL se configura en prisma.config.ts, no aquí
+  // ✅ In Prisma 7, the URL is configured in prisma.config.ts, not here
 }
 
 
@@ -73,6 +73,7 @@ model Restaurant {
   reservationDuration Int      @default(90) @map("reservation_duration")
   createdAt           DateTime @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamp(6)
+  deletedAt     DateTime? @map("deleted_at") @db.Timestamp(6)
   ownerId             String   @map("owner_id") @db.Uuid
 
   owner    User    @relation(fields: [ownerId], references: [id], onDelete: Restrict)
@@ -117,15 +118,15 @@ model Reservation {
   status          ReservationStatus @default(pending)
   customerNotes   String?           @map("customer_notes") @db.Text
   adminNotes      String?           @map("admin_notes") @db.Text
-  createdAt       DateTime          @default(now()) @map("created_at") @db.Timestamp(6) // ARREGLADO: Agregado espacio antes de @db.Timestamp(6)
+  createdAt       DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt       DateTime          @updatedAt @map("updated_at") @db.Timestamp(6)
 
-  // Relaciones
+  // Relations
   restaurant      Restaurant        @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   table           Table             @relation(fields: [tableId], references: [id], onDelete: Restrict)
 
-  // Índices compuestos (para performance)
+  // Composite indexes (for performance)
   @@index([restaurantId, reservationDate, reservationTime])
   @@index([userId])
   @@index([tableId, reservationDate])

@@ -40,10 +40,15 @@ router.get("/owners/:id", authMiddleware, requireSuperAdmin, getById);
 router.patch("/owners/:id", authMiddleware, requireSuperAdmin, update);
 
 /**
- * @route DELETE /api/super-admin/owners/:id
- * @description Delete an existing owner
+ * @route PATCH /api/super-admin/owners/:id/deactivate
+ * @description Deactivate an existing owner (soft delete)
  * @access Super Admin only
  */
-router.delete("/owners/:id", authMiddleware, requireSuperAdmin, deactivate);
+router.patch(
+  "/owners/:id/deactivate",
+  authMiddleware,
+  requireSuperAdmin,
+  deactivate
+);
 
 export default router;

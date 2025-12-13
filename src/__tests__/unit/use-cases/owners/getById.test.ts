@@ -5,7 +5,7 @@ import { User } from "../../../../domain/user.entity";
 import { ERROR_MESSAGES } from "../../../../constants/messages";
 
 describe("GetById Use Case", () => {
-  // Mock del repositorio
+  // Repository mock
   const mockUserRepository: jest.Mocked<IUserRepository> = {
     findById: jest.fn(),
     findByEmail: jest.fn(),
@@ -15,7 +15,7 @@ describe("GetById Use Case", () => {
     findAllByRole: jest.fn(),
   };
 
-  // Instancia del use case con el mock
+  // Use case instance with mock
   const useCase = new GetById(mockUserRepository);
 
   beforeEach(() => {
@@ -29,7 +29,7 @@ describe("GetById Use Case", () => {
       "owner@test.com",
       "hashedPassword",
       "Carlos",
-      "García",
+      "Smith",
       "5551234567",
       "owner",
       new Date(),

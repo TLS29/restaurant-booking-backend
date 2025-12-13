@@ -1,0 +1,442 @@
+paths:
+  /api/owner/restaurants:
+    get:
+      tags:
+        - Owner
+      summary: List my restaurants
+      description: |
+        Returns a paginated list of all restaurants owned by the authenticated owner.
+        Only owner users can access this endpoint.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Page number
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+          description: Number of items per page
+      responses:
+        '200':
+          description: List of restaurants with pagination info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListRestaurantsResponse'
+        '401':
+          description: No token provided or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '403':
+          description: Access denied - Owner only
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+    post:
+      tags:
+        - Owner
+      summary: Create a new restaurant
+      description: |
+        Creates a new restaurant under the authenticated owner's account.
+        Only owner users can access this endpoint.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRestaurantRequest'
+      responses:
+        '201':
+          description: Restaurant created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateRestaurantResponse'
+        '400':
+          description: Validation error or slug already exists
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: './schemas/errors.yaml#/components/schemas/ValidationError'
+                  - $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '401':
+          description: No token provided or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '403':
+          description: Access denied - Owner only
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+
+  /api/owner/restaurants/{id}:
+    get:
+      tags:
+        - Owner
+      summary: Get restaurant by ID
+      description: |
+        Returns a single restaurant's details by its unique identifier.
+        Only the owner of the restaurant can access this endpoint.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Restaurant's unique identifier
+      responses:
+        '200':
+          description: Restaurant details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestaurantPublic'
+        '400':
+          description: Restaurant not found or not owned by user
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '401':
+          description: No token provided or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '403':
+          description: Access denied - Owner only
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+    patch:
+      tags:
+        - Owner
+      summary: Update a restaurant
+      description: |
+        Updates an existing restaurant's information.
+        Only the owner of the restaurant can access this endpoint.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Restaurant's unique identifier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRestaurantRequest'
+      responses:
+        '200':
+          description: Restaurant updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateRestaurantResponse'
+        '400':
+          description: Validation error, restaurant not found, or not owned by user
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: './schemas/errors.yaml#/components/schemas/ValidationError'
+                  - $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '401':
+          description: No token provided or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '403':
+          description: Access denied - Owner only
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+
+  /api/owner/restaurants/{id}/deactivate:
+    patch:
+      tags:
+        - Owner
+      summary: Deactivate a restaurant
+      description: |
+        Soft deletes a restaurant by setting its deletedAt timestamp.
+        The restaurant will be deactivated but data is preserved.
+        Only the owner of the restaurant can access this endpoint.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Restaurant's unique identifier
+      responses:
+        '200':
+          description: Restaurant deactivated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeactivateRestaurantResponse'
+        '400':
+          description: Restaurant not found or not owned by user
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '401':
+          description: No token provided or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '403':
+          description: Access denied - Owner only
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+
+components:
+  schemas:
+    CreateRestaurantRequest:
+      type: object
+      required:
+        - name
+        - slug
+        - email
+        - openingTime
+        - closingTime
+      properties:
+        name:
+          type: string
+          minLength: 2
+          description: Restaurant name
+          example: Pizzeria Mario
+        slug:
+          type: string
+          minLength: 3
+          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+          description: URL-friendly identifier (lowercase, hyphens only)
+          example: pizzeria-mario
+        email:
+          type: string
+          format: email
+          description: Restaurant contact email
+          example: contact@pizzeria-mario.com
+        phone:
+          type: string
+          minLength: 10
+          description: Restaurant phone number (optional)
+          example: "5551234567"
+        address:
+          type: string
+          description: Restaurant address (optional)
+          example: 123 Main Street, Downtown
+        openingTime:
+          type: string
+          pattern: '^([01]\d|2[0-3]):([0-5]\d)$'
+          description: Opening time in HH:mm format
+          example: "09:00"
+        closingTime:
+          type: string
+          pattern: '^([01]\d|2[0-3]):([0-5]\d)$'
+          description: Closing time in HH:mm format
+          example: "22:00"
+        reservationDuration:
+          type: integer
+          minimum: 15
+          maximum: 240
+          description: Default reservation duration in minutes (optional, default 90)
+          example: 60
+
+    UpdateRestaurantRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          description: Restaurant name
+          example: Pizzeria Mario Bros
+        slug:
+          type: string
+          minLength: 3
+          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+          description: URL-friendly identifier (lowercase, hyphens only)
+          example: pizzeria-mario-bros
+        email:
+          type: string
+          format: email
+          description: Restaurant contact email
+          example: contact@pizzeria-mario.com
+        phone:
+          type: string
+          minLength: 10
+          description: Restaurant phone number
+          example: "5551234567"
+        address:
+          type: string
+          description: Restaurant address
+          example: 456 New Street, Uptown
+        openingTime:
+          type: string
+          pattern: '^([01]\d|2[0-3]):([0-5]\d)$'
+          description: Opening time in HH:mm format
+          example: "10:00"
+        closingTime:
+          type: string
+          pattern: '^([01]\d|2[0-3]):([0-5]\d)$'
+          description: Closing time in HH:mm format
+          example: "23:00"
+        reservationDuration:
+          type: integer
+          minimum: 15
+          maximum: 240
+          description: Default reservation duration in minutes
+          example: 90
+
+    RestaurantPublic:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        name:
+          type: string
+          example: Pizzeria Mario
+        slug:
+          type: string
+          example: pizzeria-mario
+        email:
+          type: string
+          format: email
+          example: contact@pizzeria-mario.com
+        phone:
+          type: string
+          nullable: true
+          example: "5551234567"
+        address:
+          type: string
+          nullable: true
+          example: 123 Main Street, Downtown
+        openingTime:
+          type: string
+          format: date-time
+          example: 1970-01-01T09:00:00.000Z
+        closingTime:
+          type: string
+          format: date-time
+          example: 1970-01-01T22:00:00.000Z
+        reservationDuration:
+          type: integer
+          example: 60
+
+    ListRestaurantsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/RestaurantPublic'
+        pagination:
+          type: object
+          properties:
+            page:
+              type: integer
+              example: 1
+            limit:
+              type: integer
+              example: 10
+            total:
+              type: integer
+              example: 5
+            totalPages:
+              type: integer
+              example: 1
+
+    CreateRestaurantResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Restaurant created successfully
+        data:
+          $ref: '#/components/schemas/RestaurantPublic'
+
+    UpdateRestaurantResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Restaurant updated successfully
+        data:
+          $ref: '#/components/schemas/RestaurantPublic'
+
+    DeactivateRestaurantResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Restaurant deactivated successfully
+        data:
+          $ref: '#/components/schemas/RestaurantPublic'

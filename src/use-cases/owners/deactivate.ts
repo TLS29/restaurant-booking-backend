@@ -17,9 +17,9 @@ export class Deactivate {
       throw new Error(ERROR_MESSAGES.OWNER_NOT_FOUND);
     }
 
-    const updatedUser = await this.userRepository.deactivate(id);
+    const deactivatedOwner = await this.userRepository.deactivate(id);
 
-    return updatedUser.toPublic();
+    return deactivatedOwner.toPublic();
   }
 }
 

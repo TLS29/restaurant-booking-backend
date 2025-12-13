@@ -4,7 +4,7 @@ import { IUserRepository } from "../../../../repositories/interfaces/user";
 import { List } from "../../../../use-cases/owners/list";
 
 describe("List Owners Use Case", () => {
-  // Mock del repositorio
+  // Repository mock
   const mockUserRepository: jest.Mocked<IUserRepository> = {
     findById: jest.fn(),
     findByEmail: jest.fn(),
@@ -14,7 +14,7 @@ describe("List Owners Use Case", () => {
     findAllByRole: jest.fn(),
   };
 
-  // Instancia del use case con el mock
+  // Use case instance with mock
   const useCase = new List(mockUserRepository);
 
   beforeEach(() => {
@@ -27,7 +27,7 @@ describe("List Owners Use Case", () => {
       "owner@test.com",
       "hashedPassword",
       "Carlos",
-      "García",
+      "Smith",
       "5551234567",
       "owner",
       new Date(),
@@ -89,9 +89,9 @@ describe("List Owners Use Case", () => {
   });
 
   it("should calculate totalPages correctly", async () => {
-    // Arrange - 25 owners total, pidiendo 10 por página = 3 páginas
+    // Arrange - 25 owners total, requesting 10 per page = 3 pages
     mockUserRepository.findAllByRole.mockResolvedValue({
-      users: [], // No importa el contenido, solo el total
+      users: [], // Content doesn't matter, only the total
       total: 25,
     });
 

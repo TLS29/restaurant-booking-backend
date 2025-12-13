@@ -5,7 +5,7 @@ import { User } from "../../../../domain/user.entity";
 import { ERROR_MESSAGES } from "../../../../constants/messages";
 
 describe("Deactivate Owners Use Case", () => {
-  // Mock del repositorio
+  // Repository mock
   const mockUserRepository: jest.Mocked<IUserRepository> = {
     findById: jest.fn(),
     findByEmail: jest.fn(),
@@ -15,7 +15,7 @@ describe("Deactivate Owners Use Case", () => {
     findAllByRole: jest.fn(),
   };
 
-  // Instancia del use case con el mock
+  // Use case instance with mock
   const useCase = new Deactivate(mockUserRepository);
 
   beforeEach(() => {
@@ -30,7 +30,7 @@ describe("Deactivate Owners Use Case", () => {
       "ownerd@test.com",
       "hashedPassword",
       "Carlos",
-      "García",
+      "Smith",
       "5551234567",
       "owner",
       new Date(),

@@ -6,7 +6,7 @@ import { LoginDTO } from "../../../../dto/auth";
 import { ERROR_MESSAGES } from "../../../../constants/messages";
 
 describe("Login Use Case", () => {
-  // Mock del repositorio
+  // Repository mock
   const mockUserRepository: jest.Mocked<IUserRepository> = {
     findById: jest.fn(),
     findByEmail: jest.fn(),
@@ -16,7 +16,7 @@ describe("Login Use Case", () => {
     findAllByRole: jest.fn(),
   };
 
-  // Mock de las dependencias
+  // Dependencies mock
   const mockComparePassword =
     jest.fn<(password: string, hash: string) => Promise<boolean>>();
   const mockGenerateToken = jest
@@ -42,7 +42,7 @@ describe("Login Use Case", () => {
       "user@test.com",
       "hashedPassword",
       "Carlos",
-      "García",
+      "Smith",
       "5551234567",
       "owner",
       new Date(),
@@ -103,7 +103,7 @@ describe("Login Use Case", () => {
       "user@test.com",
       "hashedPassword",
       "Carlos",
-      "García",
+      "Smith",
       "5551234567",
       "owner",
       new Date(),

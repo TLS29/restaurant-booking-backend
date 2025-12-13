@@ -9,7 +9,7 @@ import { RegisterDTO } from "../../../../dto/auth";
 import { ERROR_MESSAGES } from "../../../../constants/messages";
 
 describe("Register Use Case", () => {
-  // Mock del repositorio
+  // Repository mock
   const mockUserRepository: jest.Mocked<IUserRepository> = {
     findById: jest.fn(),
     findByEmail: jest.fn(),
@@ -19,7 +19,7 @@ describe("Register Use Case", () => {
     findAllByRole: jest.fn(),
   };
 
-  // Mock de las dependencias
+  // Dependencies mock
   const mockDeps: RegisterDependencies = {
     userRepository: mockUserRepository,
     hashPassword: jest
@@ -43,7 +43,7 @@ describe("Register Use Case", () => {
       "user@test.com",
       "hashedPassword",
       "Carlos",
-      "García",
+      "Smith",
       "5551234567",
       "customer",
       new Date(),
@@ -55,7 +55,7 @@ describe("Register Use Case", () => {
       email: "user@test.com",
       password: "plainPassword123",
       firstName: "Carlos",
-      lastName: "García",
+      lastName: "Smith",
       phone: "5551234567",
     };
 
@@ -84,7 +84,7 @@ describe("Register Use Case", () => {
       "user@test.com",
       "hashedPassword",
       "Carlos",
-      "García",
+      "Smith",
       "5551234567",
       "customer",
       new Date(),
@@ -96,7 +96,7 @@ describe("Register Use Case", () => {
       email: "user@test.com",
       password: "plainPassword123",
       firstName: "Carlos",
-      lastName: "García",
+      lastName: "Smith",
       phone: "5551234567",
     };
 
