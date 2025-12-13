@@ -2,6 +2,10 @@ import { restaurantRepository } from "../../repositories/prisma/restaurant";
 import { IRestaurantRepository } from "../../repositories/interfaces/restaurant";
 import { ERROR_MESSAGES } from "../../constants/messages";
 
+/**
+ * Deactivate Restaurant Use Case
+ * Soft deletes a restaurant if it belongs to the owner
+ */
 export class Deactivate {
   constructor(private readonly restaurantRepository: IRestaurantRepository) {}
 

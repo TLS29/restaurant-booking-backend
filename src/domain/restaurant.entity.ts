@@ -1,3 +1,7 @@
+/**
+ * Restaurant Domain Entity
+ * Pure business object representing a restaurant
+ */
 export class Restaurant {
   constructor(
     public readonly id: string,
@@ -15,6 +19,9 @@ export class Restaurant {
     public readonly deletedAt: Date | null
   ) {}
 
+  /**
+   * Returns restaurant data without sensitive fields (for API responses)
+   */
   toPublic() {
     return {
       id: this.id,
@@ -30,6 +37,9 @@ export class Restaurant {
   }
 }
 
+/**
+ * Data required to create a new restaurant
+ */
 export interface CreateRestaurantData {
   name: string;
   slug: string;
@@ -42,4 +52,7 @@ export interface CreateRestaurantData {
   ownerId: string;
 }
 
+/**
+ * Data for updating a restaurant (all fields optional)
+ */
 export type UpdateRestaurantData = Partial<CreateRestaurantData>;

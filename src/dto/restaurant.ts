@@ -31,6 +31,10 @@ export const createSchema = z.object({
  */
 export type CreateDTO = z.infer<typeof createSchema>;
 
+/**
+ * Zod schema for updating a restaurant
+ * All fields are optional for partial updates
+ */
 export const updateSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").optional(),
   slug: z
@@ -55,10 +59,14 @@ export const updateSchema = z.object({
   reservationDuration: z.number().min(15).max(240).optional(),
 });
 
+/**
+ * Data Transfer Object for restaurant update
+ * Inferred from updateSchema for type safety
+ */
 export type UpdateDTO = z.infer<typeof updateSchema>;
 
 /**
- * Zod schema for list owners query params
+ * Zod schema for list restaurants query params
  * Validates and coerces pagination parameters
  */
 export const listQuerySchema = z.object({

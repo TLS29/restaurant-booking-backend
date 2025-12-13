@@ -8,6 +8,12 @@ import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../constants/messages";
 import { list as listRestaurants } from "../use-cases/restaurants/list";
 import { getById as getRestaurantById } from "../use-cases/restaurants/getById";
 
+/**
+ * List Restaurants Controller
+ * Returns paginated list of restaurants owned by the authenticated owner
+ *
+ * @route GET /api/owner/restaurants
+ */
 export const list = async (req: Request, res: Response) => {
   try {
     const query = listQuerySchema.parse(req.query);
@@ -31,6 +37,12 @@ export const list = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * Get Restaurant by ID Controller
+ * Returns a specific restaurant if it belongs to the authenticated owner
+ *
+ * @route GET /api/owner/restaurants/:id
+ */
 export const getById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -89,6 +101,12 @@ export const create = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * Update Restaurant Controller
+ * Updates an existing restaurant if it belongs to the authenticated owner
+ *
+ * @route PATCH /api/owner/restaurants/:id
+ */
 export const update = async (req: Request, res: Response) => {
   try {
     const validatedData = updateSchema.parse(req.body);
@@ -122,6 +140,12 @@ export const update = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * Deactivate Restaurant Controller
+ * Soft deletes a restaurant if it belongs to the authenticated owner
+ *
+ * @route PATCH /api/owner/restaurants/:id/deactivate
+ */
 export const deactivate = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;

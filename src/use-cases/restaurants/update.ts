@@ -3,6 +3,10 @@ import { UpdateDTO } from "../../dto/restaurant";
 import { IRestaurantRepository } from "../../repositories/interfaces/restaurant";
 import { restaurantRepository } from "../../repositories/prisma/restaurant";
 
+/**
+ * Update Restaurant Use Case
+ * Updates a restaurant if it belongs to the owner
+ */
 export class Update {
   constructor(private readonly restaurantRepository: IRestaurantRepository) {}
   async execute(id: string, data: UpdateDTO, ownerId: string) {

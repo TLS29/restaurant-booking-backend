@@ -3,7 +3,7 @@ import { UserRole } from "@prisma/client";
 import { ERROR_MESSAGES } from "../constants/messages";
 
 /**
- * Owner| Authorization Middleware
+ * Owner Authorization Middleware
  * Verifies that the authenticated user has owner role
  *
  * Must be used AFTER authMiddleware (requires req.user to be set)

@@ -1,6 +1,10 @@
 import { IRestaurantRepository } from "../../repositories/interfaces/restaurant";
 import { restaurantRepository } from "../../repositories/prisma/restaurant";
 
+/**
+ * List Restaurants Use Case
+ * Returns paginated list of restaurants for a specific owner
+ */
 export class List {
   constructor(private restaurantRepository: IRestaurantRepository) {}
 

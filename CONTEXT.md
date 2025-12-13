@@ -1,7 +1,7 @@
 # 📋 SISTEMA DE RESERVACIONES MULTITENANT - Documento de Contexto
 
-> **Versión:** 4.4
-> **Última actualización:** 2025-12-09
+> **Versión:** 4.5
+> **Última actualización:** 2025-12-12
 > **Autor:** Jonathan García (con mentoría de Claude)
 
 ---
@@ -23,7 +23,7 @@
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  FASE ACTUAL: 2 - Gestión de Restaurantes               │
-│  PASO ACTUAL: 🔄 CRUD Restaurant (por Owner)            │
+│  PASO ACTUAL: ✅ CRUD Restaurant (por Owner)            │
 │  SIGUIENTE:   ⬚ Owner agrega staff                      │
 └─────────────────────────────────────────────────────────┘
 ```
@@ -38,13 +38,18 @@
 - ✅ Crear super_admin inicial (vía seed)
 - ✅ Middleware: requireAuth
 - ✅ Middleware: requireSuperAdmin
+- ✅ Middleware: requireOwner
 - ✅ Owner relation en Restaurant
 - ✅ Endpoint: Super admin crea owner
 - ✅ Domain entity pattern (User class con toPublic())
 - ✅ CRUD completo de Owners (list, getById, update, deactivate)
+- ✅ CRUD completo de Restaurants (create, list, getById, update, deactivate)
 - ✅ Refactor use cases a patrón DI (Dependency Injection)
 - ✅ Setup Jest para unit tests
 - ✅ Unit tests para owners use cases (100% coverage)
+- ✅ Unit tests para restaurants use cases
+- ✅ Soft delete con deletedAt en restaurants
+- ✅ Multitenant isolation (owner solo ve sus restaurantes)
 
 ---
 
@@ -71,9 +76,9 @@
 | #   | Tarea                                                | Estado | Concepto Senior                    |
 | --- | ---------------------------------------------------- | ------ | ---------------------------------- |
 | 2.0 | CRUD Owners (super_admin crea/gestiona owners)       | ✅     | **Domain Entity Pattern + DI**     |
-| 2.1 | CRUD Restaurants (owner crea/gestiona sus restaurantes) | 🔄  | —                                  |
+| 2.1 | CRUD Restaurants (owner crea/gestiona sus restaurantes) | ✅  | **Multitenant Isolation**          |
 | 2.2 | Endpoint: Owner agrega staff (manager, staff)        | ⬚      | **Factory Pattern + Transactions** |
-| 2.3 | Middleware: requireOwner                             | ⬚      | —                                  |
+| 2.3 | Middleware: requireOwner                             | ✅     | —                                  |
 | 2.4 | Middleware: requireRestaurantAccess                  | ⬚      | —                                  |
 | 2.5 | Middleware: requireStaffRole (verificar rol mínimo)  | ⬚      | **Strategy Pattern**               |
 
@@ -566,6 +571,7 @@ if (!hasAccess) {
 | 2025-11-30 | Seed super_admin, requireAuth middleware             | Endpoint: crear owner       |
 | 2025-12-01 | Endpoint crear owner, requireSuperAdmin, Domain Entity | CRUD owners completo      |
 | 2025-12-08 | CRUD owners completo, refactor DI, Jest setup, unit tests | CRUD restaurants        |
+| 2025-12-12 | CRUD restaurants completo, requireOwner, unit tests, soft delete | Owner agrega staff |
 
 ---
 
@@ -643,7 +649,18 @@ export const execute = async (id: string) => {
 
 ---
 
-> **Versión:** 4.4
+> **Versión:** 4.5
+> **Cambios v4.5:**
+>
+> - CRUD completo de Restaurants (create, list, getById, update, deactivate)
+> - Middleware requireOwner implementado
+> - Unit tests para todos los use cases de restaurants
+> - Soft delete con campo deletedAt en restaurants
+> - Multitenant isolation: owner solo ve/edita sus propios restaurantes
+> - Traducción de comentarios español → inglés en todo el código
+> - Fix: superAdmin routes usan PATCH para deactivate (soft delete)
+> - Agregado FUTURE_FEATURES.md para tracking de mejoras futuras
+>
 > **Cambios v4.4:**
 >
 > - Agregada regla: unit tests obligatorios, coverage mínimo 95%

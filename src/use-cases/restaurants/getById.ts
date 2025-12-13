@@ -2,6 +2,10 @@ import { ERROR_MESSAGES } from "../../constants/messages";
 import { IRestaurantRepository } from "../../repositories/interfaces/restaurant";
 import { restaurantRepository } from "../../repositories/prisma/restaurant";
 
+/**
+ * Get Restaurant by ID Use Case
+ * Returns a specific restaurant if it belongs to the owner
+ */
 export class GetById {
   constructor(private readonly restaurantRepository: IRestaurantRepository) {}
 

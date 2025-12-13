@@ -104,7 +104,8 @@ paths:
             application/json:
               schema:
                 $ref: './schemas/errors.yaml#/components/schemas/Error'
-    delete:
+  /api/super-admin/owners/{id}/deactivate:
+    patch:
       tags:
         - Super Admin
       summary: Deactivate an owner
