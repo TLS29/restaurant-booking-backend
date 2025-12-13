@@ -6,7 +6,7 @@ import { ERROR_MESSAGES } from "../../../../constants/messages";
 import { UpdateDTO } from "../../../../dto/owner";
 
 describe("Update Owners Use Case", () => {
-  // Mock del repositorio
+  // Repository mock
   const mockUserRepository: jest.Mocked<IUserRepository> = {
     findById: jest.fn(),
     findByEmail: jest.fn(),
@@ -16,7 +16,7 @@ describe("Update Owners Use Case", () => {
     findAllByRole: jest.fn(),
   };
 
-  // Instancia del use case con el mock
+  // Use case instance with mock
   const useCase = new Update(mockUserRepository);
 
   beforeEach(() => {
@@ -31,7 +31,7 @@ describe("Update Owners Use Case", () => {
       "ownerupdated@test.com",
       "hashedPassword",
       "Carlos",
-      "García",
+      "Smith",
       "5551234567",
       "owner",
       new Date(),
@@ -42,7 +42,7 @@ describe("Update Owners Use Case", () => {
     const inputData: UpdateDTO = {
       email: "ownerupdated@test.com",
       firstName: "Carlos",
-      lastName: "García",
+      lastName: "Smith",
       phone: "5551234567",
     };
 
@@ -51,7 +51,7 @@ describe("Update Owners Use Case", () => {
       "owner@test.com",
       "hashedPassword",
       "Carlos",
-      "García",
+      "Smith",
       "5551234567",
       "owner",
       new Date(),
@@ -76,7 +76,7 @@ describe("Update Owners Use Case", () => {
     const inputData: UpdateDTO = {
       email: "ownerupdated@test.com",
       firstName: "Carlos",
-      lastName: "García",
+      lastName: "Smith",
       phone: "5551234567",
     };
 

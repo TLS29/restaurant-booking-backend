@@ -6,7 +6,7 @@ import { ERROR_MESSAGES } from "../../../../constants/messages";
 import { CreateDTO } from "../../../../dto/owner";
 
 describe("Create Owners Use Case", () => {
-  // Mock del repositorio
+  // Repository mock
   const mockUserRepository: jest.Mocked<IUserRepository> = {
     findById: jest.fn(),
     findByEmail: jest.fn(),
@@ -16,7 +16,7 @@ describe("Create Owners Use Case", () => {
     findAllByRole: jest.fn(),
   };
 
-  // Instancia del use case con el mock
+  // Use case instance with mock
   const useCase = new Create(mockUserRepository);
 
   beforeEach(() => {
@@ -30,7 +30,7 @@ describe("Create Owners Use Case", () => {
       "owner@test.com",
       "hashedPassword",
       "Carlos",
-      "García",
+      "Smith",
       "5551234567",
       "owner",
       new Date(),
@@ -42,7 +42,7 @@ describe("Create Owners Use Case", () => {
       email: "owner@test.com",
       password: "plainPassword123",
       firstName: "Carlos",
-      lastName: "García",
+      lastName: "Smith",
       phone: "5551234567",
     };
 
@@ -68,7 +68,7 @@ describe("Create Owners Use Case", () => {
       "owner@test.com",
       "hashedPassword",
       "Carlos",
-      "García",
+      "Smith",
       "5551234567",
       "owner",
       new Date(),
@@ -80,11 +80,11 @@ describe("Create Owners Use Case", () => {
       email: "owner@test.com",
       password: "plainPassword123",
       firstName: "Carlos",
-      lastName: "García",
+      lastName: "Smith",
       phone: "5551234567",
     };
 
-    mockUserRepository.findByEmail.mockResolvedValue(existingUser); // Email YA existe
+    mockUserRepository.findByEmail.mockResolvedValue(existingUser); // Email already exists
 
     // Act & Assert
     await expect(useCase.execute(inputData)).rejects.toThrow(
@@ -93,6 +93,6 @@ describe("Create Owners Use Case", () => {
     expect(mockUserRepository.findByEmail).toHaveBeenCalledWith(
       "owner@test.com"
     );
-    expect(mockUserRepository.create).not.toHaveBeenCalled(); // No debe crear
+    expect(mockUserRepository.create).not.toHaveBeenCalled();
   });
 });

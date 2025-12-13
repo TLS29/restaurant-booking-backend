@@ -12,6 +12,7 @@ export const ERROR_MESSAGES = {
 
   // Authorization
   SUPER_ADMIN_ONLY: "Access denied. Super admin only.",
+  OWNER_ONLY: "Access denied. Owner only.",
 
   // Generic
   VALIDATION_ERROR: "Validation error",
@@ -19,6 +20,11 @@ export const ERROR_MESSAGES = {
 
   // Owner
   OWNER_NOT_FOUND: "Owner not found",
+
+  // Restaurant
+  SLUG_ALREADY_EXISTS: "Restaurant slug already exists",
+  RESTAURANT_NOT_FOUND: "Restaurant not found",
+  NOT_YOUR_RESTAURANT: "You do not have permission to modify this restaurant",
 } as const;
 
 export const SUCCESS_MESSAGES = {
@@ -27,4 +33,7 @@ export const SUCCESS_MESSAGES = {
   OWNER_CREATED: "Owner created successfully",
   OWNER_UPDATED: "Owner updated successfully",
   OWNER_DEACTIVATED: "Owner deactivated successfully",
+  RESTAURANT_CREATED: "Restaurant created successfully",
+  RESTAURANT_UPDATED: "Restaurant updated successfully",
+  RESTAURANT_DEACTIVATED: "Restaurant deactivated successfully",
 } as const;
