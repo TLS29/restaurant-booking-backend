@@ -1,20 +1,13 @@
 import { describe, it, expect, jest, beforeEach } from "@jest/globals";
 import { Login, LoginDependencies } from "../../../../use-cases/auth/login";
-import { IUserRepository } from "../../../../repositories/interfaces/user";
+import { createMockUow } from "../../../mocks/unit-of-work.mock";
 import { User } from "../../../../domain/user.entity";
 import { LoginDTO } from "../../../../dto/auth";
 import { ERROR_MESSAGES } from "../../../../constants/messages";
 
 describe("Login Use Case", () => {
   // Repository mock
-  const mockUserRepository: jest.Mocked<IUserRepository> = {
-    findById: jest.fn(),
-    findByEmail: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-    deactivate: jest.fn(),
-    findAllByRole: jest.fn(),
-  };
+  const { mockUow, mockUserRepository } = createMockUow();
 
   // Dependencies mock
   const mockComparePassword =
@@ -24,7 +17,7 @@ describe("Login Use Case", () => {
     .mockReturnValue("mock-jwt-token");
 
   const mockDeps: LoginDependencies = {
-    userRepository: mockUserRepository,
+    uow: mockUow,
     comparePassword: mockComparePassword,
     generateToken: mockGenerateToken,
   };

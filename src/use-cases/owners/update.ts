@@ -1,24 +1,28 @@
-import { IUserRepository } from "../../repositories/interfaces/user";
-import { userRepository } from "../../repositories/prisma/user";
+import { IUnitOfWork } from "../../repositories/interfaces/unit-of-work";
 import { UpdateDTO } from "../../dto/owner";
 import { ERROR_MESSAGES } from "../../constants/messages";
 
 /**
  * Update Owner Use Case
  * Updates an existing owner's basic information
- *
- * @throws {Error} If owner is not found
  */
 export class Update {
-  constructor(private readonly userRepository: IUserRepository) {}
+  constructor(private readonly uow: IUnitOfWork) {}
 
+  /**
+   * Updates owner data by ID
+   * @param id - Owner's unique identifier
+   * @param data - Fields to update
+   * @returns Updated public user data
+   * @throws Error if owner not found
+   */
   async execute(id: string, data: UpdateDTO) {
-    const owner = await this.userRepository.findById(id);
+    const owner = await this.uow.userRepository.findById(id);
     if (!owner) {
       throw new Error(ERROR_MESSAGES.OWNER_NOT_FOUND);
     }
 
-    const updatedUser = await this.userRepository.update({
+    const updatedUser = await this.uow.userRepository.update({
       id,
       ...data,
     });
@@ -26,5 +30,3 @@ export class Update {
     return updatedUser.toPublic();
   }
 }
-
-export const update = new Update(userRepository);

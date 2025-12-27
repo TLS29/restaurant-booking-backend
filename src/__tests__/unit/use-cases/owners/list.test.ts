@@ -1,21 +1,14 @@
 import { describe, it, expect, jest, beforeEach } from "@jest/globals";
 import { User } from "../../../../domain/user.entity";
-import { IUserRepository } from "../../../../repositories/interfaces/user";
 import { List } from "../../../../use-cases/owners/list";
+import { createMockUow } from "../../../mocks/unit-of-work.mock";
 
 describe("List Owners Use Case", () => {
-  // Repository mock
-  const mockUserRepository: jest.Mocked<IUserRepository> = {
-    findById: jest.fn(),
-    findByEmail: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-    deactivate: jest.fn(),
-    findAllByRole: jest.fn(),
-  };
+  // Create mocks using the factory
+  const { mockUow, mockUserRepository } = createMockUow();
 
-  // Use case instance with mock
-  const useCase = new List(mockUserRepository);
+  // Use case receives the UoW
+  const useCase = new List(mockUow);
 
   beforeEach(() => {
     jest.clearAllMocks();

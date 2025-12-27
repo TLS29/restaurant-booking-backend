@@ -3,25 +3,18 @@ import {
   Register,
   RegisterDependencies,
 } from "../../../../use-cases/auth/register";
-import { IUserRepository } from "../../../../repositories/interfaces/user";
+import { createMockUow } from "../../../mocks/unit-of-work.mock";
 import { User } from "../../../../domain/user.entity";
 import { RegisterDTO } from "../../../../dto/auth";
 import { ERROR_MESSAGES } from "../../../../constants/messages";
 
 describe("Register Use Case", () => {
   // Repository mock
-  const mockUserRepository: jest.Mocked<IUserRepository> = {
-    findById: jest.fn(),
-    findByEmail: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-    deactivate: jest.fn(),
-    findAllByRole: jest.fn(),
-  };
+  const { mockUow, mockUserRepository } = createMockUow();
 
   // Dependencies mock
   const mockDeps: RegisterDependencies = {
-    userRepository: mockUserRepository,
+    uow: mockUow,
     hashPassword: jest
       .fn<(password: string) => Promise<string>>()
       .mockResolvedValue("hashedPassword"),

@@ -1,12 +1,14 @@
 import { Request, Response } from "express";
 import { z } from "zod";
 import { createSchema, listQuerySchema, updateSchema } from "../dto/owner";
-import { list as listOwners } from "../use-cases/owners/list";
-import { getById as getOwnerById } from "../use-cases/owners/getById";
-import { create as createOwner } from "../use-cases/owners/create";
-import { update as updateOwner } from "../use-cases/owners/update";
-import { deactivate as deactivateOwner } from "../use-cases/owners/deactivate";
+import { List } from "../use-cases/owners/list";
+import { GetById } from "../use-cases/owners/getById";
+import { Create } from "../use-cases/owners/create";
+import { Update } from "../use-cases/owners/update";
+import { Deactivate } from "../use-cases/owners/deactivate";
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../constants/messages";
+import { UnitOfWorkPrisma } from "../repositories/prisma/unit-of-work";
+import prisma from "../config/databases/prisma";
 
 /**
  * List Owners Controller
@@ -20,7 +22,9 @@ import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../constants/messages";
 export const list = async (req: Request, res: Response) => {
   try {
     const query = listQuerySchema.parse(req.query);
-    const data = await listOwners.execute(query.page, query.limit);
+    const uow = new UnitOfWorkPrisma(prisma);
+    const listUseCase = new List(uow);
+    const data = await listUseCase.execute(query.page, query.limit);
     res.status(200).json(data);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -48,7 +52,9 @@ export const list = async (req: Request, res: Response) => {
 export const getById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const owner = await getOwnerById.execute(id);
+    const uow = new UnitOfWorkPrisma(prisma);
+    const getByIdUseCase = new GetById(uow);
+    const owner = await getByIdUseCase.execute(id);
     res.status(200).json(owner);
   } catch (error) {
     if (error instanceof Error) {
@@ -75,7 +81,9 @@ export const getById = async (req: Request, res: Response) => {
 export const create = async (req: Request, res: Response) => {
   try {
     const validatedData = createSchema.parse(req.body);
-    const result = await createOwner.execute(validatedData);
+    const uow = new UnitOfWorkPrisma(prisma);
+    const createUseCase = new Create(uow);
+    const result = await createUseCase.execute(validatedData);
     res.status(201).json({
       message: SUCCESS_MESSAGES.OWNER_CREATED,
       data: result,
@@ -113,7 +121,9 @@ export const update = async (req: Request, res: Response) => {
   try {
     const validatedData = updateSchema.parse(req.body);
     const { id } = req.params;
-    const result = await updateOwner.execute(id, validatedData);
+    const uow = new UnitOfWorkPrisma(prisma);
+    const updateUseCase = new Update(uow);
+    const result = await updateUseCase.execute(id, validatedData);
     res.status(200).json({
       message: SUCCESS_MESSAGES.OWNER_UPDATED,
       data: result,
@@ -150,7 +160,9 @@ export const update = async (req: Request, res: Response) => {
 export const deactivate = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await deactivateOwner.execute(id);
+    const uow = new UnitOfWorkPrisma(prisma);
+    const deactivateUseCase = new Deactivate(uow);
+    await deactivateUseCase.execute(id);
     res.status(200).json({
       message: SUCCESS_MESSAGES.OWNER_DEACTIVATED,
     });

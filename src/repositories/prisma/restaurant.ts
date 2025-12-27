@@ -4,9 +4,11 @@ import {
   CreateRestaurantData,
   UpdateRestaurantData,
 } from "../../domain/restaurant.entity";
-import prisma from "../../config/databases/prisma";
-import { Restaurant as PrismaRestaurant } from "@prisma/client";
+import { Restaurant as PrismaRestaurant, PrismaClient } from "@prisma/client";
 
+/**
+ * Maps Prisma Restaurant to Domain Restaurant entity
+ */
 function toDomain(prismaRestaurant: PrismaRestaurant): Restaurant {
   return new Restaurant(
     prismaRestaurant.id,
@@ -25,20 +27,33 @@ function toDomain(prismaRestaurant: PrismaRestaurant): Restaurant {
   );
 }
 
+/**
+ * Prisma implementation of the Restaurant Repository
+ * Handles all database operations for Restaurant entity
+ */
 export class RestaurantRepositoryPrisma implements IRestaurantRepository {
+  constructor(private readonly prisma: PrismaClient) {}
+
+  /**
+   * Finds all restaurants for a specific owner (paginated)
+   * @param ownerId - Owner's unique identifier
+   * @param page - Page number (1-indexed)
+   * @param limit - Number of items per page
+   * @returns Object containing restaurants array and total count
+   */
   async findAllByOwner(
     ownerId: string,
     page: number,
     limit: number
   ): Promise<{ restaurants: Restaurant[]; total: number }> {
     const [restaurants, total] = await Promise.all([
-      prisma.restaurant.findMany({
+      this.prisma.restaurant.findMany({
         where: { ownerId, deletedAt: null },
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { createdAt: "desc" },
       }),
-      prisma.restaurant.count({
+      this.prisma.restaurant.count({
         where: { ownerId, deletedAt: null },
       }),
     ]);
@@ -52,7 +67,7 @@ export class RestaurantRepositoryPrisma implements IRestaurantRepository {
    * Creates a new restaurant in the database
    */
   async create(data: CreateRestaurantData): Promise<Restaurant> {
-    const restaurant = await prisma.restaurant.create({
+    const restaurant = await this.prisma.restaurant.create({
       data: {
         name: data.name,
         address: data.address,
@@ -69,16 +84,22 @@ export class RestaurantRepositoryPrisma implements IRestaurantRepository {
     return toDomain(restaurant);
   }
 
+  /**
+   * Finds a restaurant by its unique slug
+   */
   async findBySlug(slug: string): Promise<Restaurant | null> {
-    const restaurant = await prisma.restaurant.findFirst({
+    const restaurant = await this.prisma.restaurant.findFirst({
       where: { slug, deletedAt: null },
     });
 
     return restaurant ? toDomain(restaurant) : null;
   }
 
+  /**
+   * Updates an existing restaurant in the database
+   */
   async update(id: string, data: UpdateRestaurantData): Promise<Restaurant> {
-    const restaurant = await prisma.restaurant.update({
+    const restaurant = await this.prisma.restaurant.update({
       where: { id },
       data: {
         name: data.name,
@@ -95,16 +116,22 @@ export class RestaurantRepositoryPrisma implements IRestaurantRepository {
     return toDomain(restaurant);
   }
 
+  /**
+   * Finds a restaurant by ID
+   */
   async findById(id: string): Promise<Restaurant | null> {
-    const restaurant = await prisma.restaurant.findFirst({
+    const restaurant = await this.prisma.restaurant.findFirst({
       where: { id, deletedAt: null },
     });
 
     return restaurant ? toDomain(restaurant) : null;
   }
 
+  /**
+   * Soft deletes a restaurant by setting deletedAt timestamp
+   */
   async deactivate(id: string): Promise<Restaurant> {
-    const restaurant = await prisma.restaurant.update({
+    const restaurant = await this.prisma.restaurant.update({
       where: { id },
       data: {
         deletedAt: new Date(),
@@ -114,5 +141,3 @@ export class RestaurantRepositoryPrisma implements IRestaurantRepository {
     return toDomain(restaurant);
   }
 }
-
-export const restaurantRepository = new RestaurantRepositoryPrisma();

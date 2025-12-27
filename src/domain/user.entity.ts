@@ -47,4 +47,7 @@ export interface CreateUserData {
   role: UserRole;
 }
 
+/**
+ * Data for updating a user (all fields optional except id)
+ */
 export type UpdateUserData = Partial<CreateUserData> & { id: string };

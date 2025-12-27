@@ -1,5 +1,4 @@
-import { IUserRepository } from "../../repositories/interfaces/user";
-import { userRepository } from "../../repositories/prisma/user";
+import { IUnitOfWork } from "../../repositories/interfaces/unit-of-work";
 import { UserRole } from "@prisma/client";
 
 /**
@@ -7,14 +6,21 @@ import { UserRole } from "@prisma/client";
  * Retrieves all restaurant owners with pagination
  */
 export class List {
-  constructor(private readonly userRepository: IUserRepository) {}
+  constructor(private readonly uow: IUnitOfWork) {}
 
+  /**
+   * Retrieves paginated list of owners
+   * @param page - Page number for pagination
+   * @param limit - Number of items per page
+   * @returns Paginated list of owners with metadata
+   */
   async execute(page: number, limit: number) {
-    const owners = await this.userRepository.findAllByRole(
+    const owners = await this.uow.userRepository.findAllByRole(
       UserRole.owner,
       page,
       limit
     );
+
     return {
       data: owners.users.map((user) => user.toPublic()),
       pagination: {
@@ -26,5 +32,3 @@ export class List {
     };
   }
 }
-
-export const list = new List(userRepository);

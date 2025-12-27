@@ -1,7 +1,6 @@
-import prisma from "../../config/databases/prisma";
 import { User, CreateUserData, UpdateUserData } from "../../domain/user.entity";
 import { IUserRepository } from "../interfaces/user";
-import { User as PrismaUser, UserRole } from "@prisma/client";
+import { User as PrismaUser, UserRole, PrismaClient } from "@prisma/client";
 
 /**
  * Maps Prisma User to Domain User entity
@@ -26,6 +25,7 @@ function toDomain(prismaUser: PrismaUser): User {
  * Handles all database operations for User entity
  */
 export class UserRepositoryPrisma implements IUserRepository {
+  constructor(private readonly prisma: PrismaClient) {}
   /**
    * Finds all users with a specific role (paginated)
    *
@@ -40,13 +40,13 @@ export class UserRepositoryPrisma implements IUserRepository {
     limit: number
   ): Promise<{ users: User[]; total: number }> {
     const [users, total] = await Promise.all([
-      prisma.user.findMany({
+      this.prisma.user.findMany({
         where: { role, deletedAt: null },
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { createdAt: "desc" },
       }),
-      prisma.user.count({
+      this.prisma.user.count({
         where: { role, deletedAt: null },
       }),
     ]);
@@ -60,7 +60,7 @@ export class UserRepositoryPrisma implements IUserRepository {
    * Finds a user by email address
    */
   async findByEmail(email: string): Promise<User | null> {
-    const user = await prisma.user.findFirst({
+    const user = await this.prisma.user.findFirst({
       where: { email, deletedAt: null },
     });
 
@@ -71,7 +71,7 @@ export class UserRepositoryPrisma implements IUserRepository {
    * Finds a user by ID
    */
   async findById(id: string): Promise<User | null> {
-    const user = await prisma.user.findFirst({
+    const user = await this.prisma.user.findFirst({
       where: { id, deletedAt: null },
     });
 
@@ -82,7 +82,7 @@ export class UserRepositoryPrisma implements IUserRepository {
    * Creates a new user in the database
    */
   async create(data: CreateUserData): Promise<User> {
-    const user = await prisma.user.create({
+    const user = await this.prisma.user.create({
       data: {
         email: data.email,
         passwordHash: data.passwordHash,
@@ -100,7 +100,7 @@ export class UserRepositoryPrisma implements IUserRepository {
    * Updates an existing user in the database
    */
   async update(data: UpdateUserData): Promise<User> {
-    const user = await prisma.user.update({
+    const user = await this.prisma.user.update({
       where: { id: data.id },
       data: {
         email: data.email,
@@ -117,7 +117,7 @@ export class UserRepositoryPrisma implements IUserRepository {
    * Soft deletes a user by setting deletedAt timestamp
    */
   async deactivate(id: string): Promise<User> {
-    const user = await prisma.user.update({
+    const user = await this.prisma.user.update({
       where: { id: id },
       data: {
         deletedAt: new Date(),
@@ -127,6 +127,3 @@ export class UserRepositoryPrisma implements IUserRepository {
     return toDomain(user);
   }
 }
-
-// Export singleton instance
-export const userRepository = new UserRepositoryPrisma();

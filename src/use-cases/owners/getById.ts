@@ -1,5 +1,4 @@
-import { IUserRepository } from "../../repositories/interfaces/user";
-import { userRepository } from "../../repositories/prisma/user";
+import { IUnitOfWork } from "../../repositories/interfaces/unit-of-work";
 import { ERROR_MESSAGES } from "../../constants/messages";
 
 /**
@@ -11,10 +10,10 @@ import { ERROR_MESSAGES } from "../../constants/messages";
  * @throws {Error} If owner is not found
  */
 export class GetById {
-  constructor(private readonly userRepository: IUserRepository) {}
+  constructor(private readonly uow: IUnitOfWork) {}
 
   async execute(id: string) {
-    const owner = await this.userRepository.findById(id);
+    const owner = await this.uow.userRepository.findById(id);
     if (!owner) {
       throw new Error(ERROR_MESSAGES.OWNER_NOT_FOUND);
     }
@@ -22,5 +21,3 @@ export class GetById {
     return owner.toPublic();
   }
 }
-
-export const getById = new GetById(userRepository);

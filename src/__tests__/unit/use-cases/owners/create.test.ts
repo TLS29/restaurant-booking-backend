@@ -1,23 +1,16 @@
 import { describe, it, expect, jest, beforeEach } from "@jest/globals";
 import { Create } from "../../../../use-cases/owners/create";
-import { IUserRepository } from "../../../../repositories/interfaces/user";
+import { createMockUow } from "../../../mocks/unit-of-work.mock";
 import { User } from "../../../../domain/user.entity";
 import { ERROR_MESSAGES } from "../../../../constants/messages";
 import { CreateDTO } from "../../../../dto/owner";
 
 describe("Create Owners Use Case", () => {
   // Repository mock
-  const mockUserRepository: jest.Mocked<IUserRepository> = {
-    findById: jest.fn(),
-    findByEmail: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-    deactivate: jest.fn(),
-    findAllByRole: jest.fn(),
-  };
+  const { mockUow, mockUserRepository } = createMockUow();
 
   // Use case instance with mock
-  const useCase = new Create(mockUserRepository);
+  const useCase = new Create(mockUow);
 
   beforeEach(() => {
     jest.clearAllMocks();

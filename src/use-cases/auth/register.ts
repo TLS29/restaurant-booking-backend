@@ -1,6 +1,5 @@
 import { RegisterDTO } from "../../dto/auth";
-import { IUserRepository } from "../../repositories/interfaces/user";
-import { userRepository } from "../../repositories/prisma/user";
+import { IUnitOfWork } from "../../repositories/interfaces/unit-of-work";
 import { UserRole } from "@prisma/client";
 import { hashPassword } from "../../utils/password";
 import { generateToken } from "../../utils/jwt";
@@ -10,7 +9,7 @@ import { ERROR_MESSAGES } from "../../constants/messages";
  * Dependencies for Register Use Case
  */
 export interface RegisterDependencies {
-  userRepository: IUserRepository;
+  uow: IUnitOfWork;
   hashPassword: (password: string) => Promise<string>;
   generateToken: (payload: { userId: string; role: string }) => string;
 }
@@ -30,14 +29,14 @@ export class Register {
    * @throws {Error} If email already exists in the database
    */
   async execute(data: RegisterDTO) {
-    const existingUser = await this.deps.userRepository.findByEmail(data.email);
+    const existingUser = await this.deps.uow.userRepository.findByEmail(data.email);
     if (existingUser) {
       throw new Error(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
     }
 
     const hashedPassword = await this.deps.hashPassword(data.password);
 
-    const user = await this.deps.userRepository.create({
+    const user = await this.deps.uow.userRepository.create({
       email: data.email,
       passwordHash: hashedPassword,
       firstName: data.firstName,
@@ -59,10 +58,3 @@ export class Register {
     };
   }
 }
-
-// Export singleton instance for production use
-export const register = new Register({
-  userRepository,
-  hashPassword,
-  generateToken,
-});

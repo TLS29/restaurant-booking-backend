@@ -1,26 +1,27 @@
-import { IUserRepository } from "../../repositories/interfaces/user";
-import { userRepository } from "../../repositories/prisma/user";
+import { IUnitOfWork } from "../../repositories/interfaces/unit-of-work";
 import { ERROR_MESSAGES } from "../../constants/messages";
 
 /**
  * Deactivate Owner Use Case
  * Soft deletes an owner by setting deletedAt timestamp
- *
- * @throws {Error} If owner is not found
  */
 export class Deactivate {
-  constructor(private readonly userRepository: IUserRepository) {}
+  constructor(private readonly uow: IUnitOfWork) {}
 
+  /**
+   * Soft deletes an owner
+   * @param id - Owner's unique identifier
+   * @returns Deactivated public user data
+   * @throws Error if owner not found
+   */
   async execute(id: string) {
-    const owner = await this.userRepository.findById(id);
+    const owner = await this.uow.userRepository.findById(id);
     if (!owner) {
       throw new Error(ERROR_MESSAGES.OWNER_NOT_FOUND);
     }
 
-    const deactivatedOwner = await this.userRepository.deactivate(id);
+    const deactivatedOwner = await this.uow.userRepository.deactivate(id);
 
     return deactivatedOwner.toPublic();
   }
 }
-
-export const deactivate = new Deactivate(userRepository);
