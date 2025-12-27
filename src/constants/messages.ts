@@ -25,6 +25,9 @@ export const ERROR_MESSAGES = {
   SLUG_ALREADY_EXISTS: "Restaurant slug already exists",
   RESTAURANT_NOT_FOUND: "Restaurant not found",
   NOT_YOUR_RESTAURANT: "You do not have permission to modify this restaurant",
+
+  // manager
+  MANAGER_NOT_FOUND: "Manager not found",
 } as const;
 
 export const SUCCESS_MESSAGES = {
@@ -36,4 +39,7 @@ export const SUCCESS_MESSAGES = {
   RESTAURANT_CREATED: "Restaurant created successfully",
   RESTAURANT_UPDATED: "Restaurant updated successfully",
   RESTAURANT_DEACTIVATED: "Restaurant deactivated successfully",
+  MANAGER_CREATED: "Manager created successfully",
+  MANAGER_UPDATED: "Manager updated successfully",
+  MANAGER_DESTROYED: "Manager deleted successfully",
 } as const;

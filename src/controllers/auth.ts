@@ -1,9 +1,13 @@
 import { Request, Response } from "express";
 import { registerSchema, loginSchema } from "../dto/auth";
-import { register as registerUseCase } from "../use-cases/auth/register";
-import { login as loginUseCase } from "../use-cases/auth/login";
+import { Register } from "../use-cases/auth/register";
+import { Login } from "../use-cases/auth/login";
 import { z } from "zod";
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../constants/messages";
+import { UnitOfWorkPrisma } from "../repositories/prisma/unit-of-work";
+import prisma from "../config/databases/prisma";
+import { hashPassword, comparePassword } from "../utils/password";
+import { generateToken } from "../utils/jwt";
 
 /**
  * Register Controller
@@ -20,6 +24,8 @@ import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../constants/messages";
 export const register = async (req: Request, res: Response) => {
   try {
     const validatedData = registerSchema.parse(req.body);
+    const uow = new UnitOfWorkPrisma(prisma);
+    const registerUseCase = new Register({ uow, hashPassword, generateToken });
     const result = await registerUseCase.execute(validatedData);
     res.status(201).json({
       message: SUCCESS_MESSAGES.USER_REGISTERED,
@@ -60,6 +66,8 @@ export const register = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
   try {
     const validatedData = loginSchema.parse(req.body);
+    const uow = new UnitOfWorkPrisma(prisma);
+    const loginUseCase = new Login({ uow, comparePassword, generateToken });
     const result = await loginUseCase.execute(validatedData);
     res.status(200).json({
       message: SUCCESS_MESSAGES.USER_LOGGED_IN,

@@ -7,6 +7,7 @@ import { swaggerSpec } from "./config/swagger";
 import authRoutes from "./routes/auth";
 import superAdminRoutes from "./routes/superAdmin";
 import ownerRoutes from "./routes/owner";
+import adminRoutes from "./routes/admin";
 
 dotenv.config();
 
@@ -38,6 +39,7 @@ app.get("/health", (req: Request, res: Response) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/super-admin", superAdminRoutes);
 app.use("/api/owner", ownerRoutes);
+app.use("/api/admin", adminRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {

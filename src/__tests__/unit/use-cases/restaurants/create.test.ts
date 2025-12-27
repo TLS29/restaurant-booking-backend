@@ -1,5 +1,5 @@
 import { describe, it, expect, jest, beforeEach } from "@jest/globals";
-import { IRestaurantRepository } from "../../../../repositories/interfaces/restaurant";
+import { createMockUow } from "../../../mocks/unit-of-work.mock";
 import { Create } from "../../../../use-cases/restaurants/create";
 import { Restaurant } from "../../../../domain/restaurant.entity";
 import { CreateDTO } from "../../../../dto/restaurant";
@@ -7,17 +7,10 @@ import { ERROR_MESSAGES } from "../../../../constants/messages";
 
 describe("Create Restaurants Use Case", () => {
   //repository mock
-  const mockRestaurantRepository: jest.Mocked<IRestaurantRepository> = {
-    create: jest.fn(),
-    findBySlug: jest.fn(),
-    update: jest.fn(),
-    findById: jest.fn(),
-    deactivate: jest.fn(),
-    findAllByOwner: jest.fn(),
-  };
+  const { mockUow, mockRestaurantRepository } = createMockUow();
 
   // Use case instance with mock
-  const useCase = new Create(mockRestaurantRepository);
+  const useCase = new Create(mockUow);
 
   beforeEach(() => {
     jest.clearAllMocks();

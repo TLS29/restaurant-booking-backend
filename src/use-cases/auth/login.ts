@@ -1,5 +1,4 @@
-import { IUserRepository } from "../../repositories/interfaces/user";
-import { userRepository } from "../../repositories/prisma/user";
+import { IUnitOfWork } from "../../repositories/interfaces/unit-of-work";
 import { generateToken } from "../../utils/jwt";
 import { comparePassword } from "../../utils/password";
 import { LoginDTO } from "../../dto/auth";
@@ -9,7 +8,7 @@ import { ERROR_MESSAGES } from "../../constants/messages";
  * Dependencies for Login Use Case
  */
 export interface LoginDependencies {
-  userRepository: IUserRepository;
+  uow: IUnitOfWork;
   comparePassword: (password: string, hash: string) => Promise<boolean>;
   generateToken: (payload: { userId: string; role: string }) => string;
 }
@@ -31,7 +30,7 @@ export class Login {
   async execute(data: LoginDTO) {
     const { email, password } = data;
 
-    const user = await this.deps.userRepository.findByEmail(email);
+    const user = await this.deps.uow.userRepository.findByEmail(email);
     if (!user) {
       throw new Error(ERROR_MESSAGES.INVALID_CREDENTIALS);
     }
@@ -57,10 +56,3 @@ export class Login {
     };
   }
 }
-
-// Export singleton instance for production use
-export const login = new Login({
-  userRepository,
-  comparePassword,
-  generateToken,
-});

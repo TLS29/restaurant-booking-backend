@@ -1,22 +1,15 @@
 import { describe, it, expect, jest, beforeEach } from "@jest/globals";
-import { IRestaurantRepository } from "../../../../repositories/interfaces/restaurant";
+import { createMockUow } from "../../../mocks/unit-of-work.mock";
 import { Deactivate } from "../../../../use-cases/restaurants/deactivate";
 import { Restaurant } from "../../../../domain/restaurant.entity";
 import { ERROR_MESSAGES } from "../../../../constants/messages";
 
 describe("Deactivate Restaurants Use Case", () => {
   // Repository mock
-  const mockRestaurantRepository: jest.Mocked<IRestaurantRepository> = {
-    create: jest.fn(),
-    findBySlug: jest.fn(),
-    update: jest.fn(),
-    findById: jest.fn(),
-    deactivate: jest.fn(),
-    findAllByOwner: jest.fn(),
-  };
+  const { mockUow, mockRestaurantRepository } = createMockUow();
 
   // Use case instance with mock
-  const useCase = new Deactivate(mockRestaurantRepository);
+  const useCase = new Deactivate(mockUow);
 
   beforeEach(() => {
     jest.clearAllMocks();

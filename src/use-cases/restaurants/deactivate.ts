@@ -1,5 +1,4 @@
-import { restaurantRepository } from "../../repositories/prisma/restaurant";
-import { IRestaurantRepository } from "../../repositories/interfaces/restaurant";
+import { IUnitOfWork } from "../../repositories/interfaces/unit-of-work";
 import { ERROR_MESSAGES } from "../../constants/messages";
 
 /**
@@ -7,10 +6,17 @@ import { ERROR_MESSAGES } from "../../constants/messages";
  * Soft deletes a restaurant if it belongs to the owner
  */
 export class Deactivate {
-  constructor(private readonly restaurantRepository: IRestaurantRepository) {}
+  constructor(private readonly uow: IUnitOfWork) {}
 
+  /**
+   * Soft deletes a restaurant with ownership validation
+   * @param id - Restaurant's unique identifier
+   * @param ownerId - Owner's unique identifier for validation
+   * @returns Deactivated public restaurant data
+   * @throws Error if restaurant not found or not owned by user
+   */
   async execute(id: string, ownerId: string) {
-    const existingRestaurant = await this.restaurantRepository.findById(id);
+    const existingRestaurant = await this.uow.restaurantRepository.findById(id);
 
     if (!existingRestaurant) {
       throw new Error(ERROR_MESSAGES.RESTAURANT_NOT_FOUND);
@@ -20,12 +26,10 @@ export class Deactivate {
       throw new Error(ERROR_MESSAGES.NOT_YOUR_RESTAURANT);
     }
 
-    const deactivatedRestaurant = await this.restaurantRepository.deactivate(
+    const deactivatedRestaurant = await this.uow.restaurantRepository.deactivate(
       id
     );
 
     return deactivatedRestaurant.toPublic();
   }
 }
-
-export const deactivate = new Deactivate(restaurantRepository);

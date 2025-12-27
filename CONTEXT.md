@@ -1,7 +1,7 @@
 # 📋 SISTEMA DE RESERVACIONES MULTITENANT - Documento de Contexto
 
-> **Versión:** 4.5
-> **Última actualización:** 2025-12-12
+> **Versión:** 5.0
+> **Última actualización:** 2025-12-27
 > **Autor:** Jonathan García (con mentoría de Claude)
 
 ---
@@ -23,8 +23,8 @@
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  FASE ACTUAL: 2 - Gestión de Restaurantes               │
-│  PASO ACTUAL: ✅ CRUD Restaurant (por Owner)            │
-│  SIGUIENTE:   ⬚ Owner agrega staff                      │
+│  PASO ACTUAL: ✅ CRUD Managers (por Owner)              │
+│  SIGUIENTE:   ⬚ Middleware requireRestaurantAccess     │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -50,6 +50,10 @@
 - ✅ Unit tests para restaurants use cases
 - ✅ Soft delete con deletedAt en restaurants
 - ✅ Multitenant isolation (owner solo ve sus restaurantes)
+- ✅ CRUD Managers completo (create, list, update, delete)
+- ✅ Unit of Work pattern para transacciones
+- ✅ Mock factory pattern para tests unitarios
+- ✅ Swagger documentation para endpoints de admin
 
 ---
 
@@ -77,13 +81,15 @@
 | --- | ---------------------------------------------------- | ------ | ---------------------------------- |
 | 2.0 | CRUD Owners (super_admin crea/gestiona owners)       | ✅     | **Domain Entity Pattern + DI**     |
 | 2.1 | CRUD Restaurants (owner crea/gestiona sus restaurantes) | ✅  | **Multitenant Isolation**          |
-| 2.2 | Endpoint: Owner agrega staff (manager, staff)        | ⬚      | **Factory Pattern + Transactions** |
+| 2.2 | CRUD Managers (owner gestiona managers de su restaurante) | ✅     | **Unit of Work + Transactions** |
 | 2.3 | Middleware: requireOwner                             | ✅     | —                                  |
 | 2.4 | Middleware: requireRestaurantAccess                  | ⬚      | —                                  |
 | 2.5 | Middleware: requireStaffRole (verificar rol mínimo)  | ⬚      | **Strategy Pattern**               |
 
-> 💡 **Nota sobre Factory Pattern + Transactions (2.2):**
-> Cuando lleguemos aquí, Claude debe explicar: "Factory Pattern encapsula la lógica de creación de objetos. Aquí lo usamos para crear diferentes tipos de staff (manager, staff) con validaciones específicas. Transaction garantiza que crear usuario + asignar a restaurante sea atómico."
+> 💡 **Nota sobre Unit of Work + Transactions (2.2):**
+> **Unit of Work** agrupa múltiples operaciones de repositorio en una unidad transaccional. Todos los repositorios acceden via `IUnitOfWork` que provee acceso a `userRepository`, `restaurantRepository`, `userRestaurantRepository`. **Transaction** garantiza que crear usuario + asignar a restaurante sea atómico. Si falla alguna parte, todo se revierte.
+>
+> **Nota MVP:** Por ahora solo implementamos managers. El rol `staff` se agregará post-MVP.
 
 > 💡 **Nota sobre Strategy Pattern (2.5):**
 > Cuando lleguemos aquí, Claude debe explicar: "Strategy Pattern permite cambiar el comportamiento de un algoritmo en runtime. Aquí lo usamos para tener diferentes estrategias de verificación de permisos según el rol requerido por cada endpoint."
@@ -447,9 +453,10 @@ backend/
 | POST   | `/api/admin/restaurants/:id/tables`        | Crear mesa            | admin+         |
 | PATCH  | `/api/admin/tables/:id`                    | Editar mesa           | admin+         |
 | DELETE | `/api/admin/tables/:id`                    | Eliminar mesa         | admin+         |
-| POST   | `/api/admin/restaurants/:id/staff`         | Agregar staff         | owner+         |
-| GET    | `/api/admin/restaurants/:id/staff`         | Ver staff             | admin+         |
-| DELETE | `/api/admin/restaurants/:id/staff/:userId` | Remover staff         | owner+         |
+| POST   | `/api/admin/restaurants/:id/staff`         | Agregar manager       | owner+         |
+| GET    | `/api/admin/restaurants/:id/staff`         | Listar managers       | owner+         |
+| PATCH  | `/api/admin/restaurants/:id/staff/:userId` | Actualizar manager    | owner+         |
+| DELETE | `/api/admin/restaurants/:id/staff/:userId` | Remover manager       | owner+         |
 
 ### Cliente (público o autenticado)
 
@@ -520,6 +527,7 @@ if (!hasAccess) {
 | Concepto               | Qué es (1 línea)                                    | Dónde se usa                       |
 | ---------------------- | --------------------------------------------------- | ---------------------------------- |
 | **Domain Entity + DI** | Entidades puras + inyección de dependencias         | User, Restaurant (ya implementado) |
+| **Unit of Work**       | Agrupa repositorios en unidad transaccional         | CRUD Managers (ya implementado)    |
 | **Factory Pattern**    | Encapsula creación de objetos con lógica específica | Crear diferentes tipos de staff    |
 | **Strategy Pattern**   | Intercambiar algoritmos/comportamientos en runtime  | Verificación de permisos por rol   |
 | **Observer Pattern**   | Múltiples "observadores" reaccionan a eventos       | Notificaciones al cambiar estado   |
@@ -572,6 +580,7 @@ if (!hasAccess) {
 | 2025-12-01 | Endpoint crear owner, requireSuperAdmin, Domain Entity | CRUD owners completo      |
 | 2025-12-08 | CRUD owners completo, refactor DI, Jest setup, unit tests | CRUD restaurants        |
 | 2025-12-12 | CRUD restaurants completo, requireOwner, unit tests, soft delete | Owner agrega staff |
+| 2025-12-27 | CRUD Managers completo, Unit of Work pattern, mock factory, Swagger docs, tests manuales | Middleware requireRestaurantAccess |
 
 ---
 
@@ -649,7 +658,20 @@ export const execute = async (id: string) => {
 
 ---
 
-> **Versión:** 4.5
+> **Versión:** 5.0
+> **Cambios v5.0:**
+>
+> - CRUD completo de Managers (create, list, update, delete)
+> - Unit of Work pattern implementado para transacciones
+> - Refactor de todos los unit tests a mock factory pattern
+> - Mock factory centralizado en `src/__tests__/mocks/unit-of-work.mock.ts`
+> - 38 unit tests pasando (owners, restaurants, managers, auth)
+> - Swagger documentation para endpoints de admin (docs/admin.yaml)
+> - JSDoc comments agregados a use cases y controllers de managers
+> - Creado TEST_CREDENTIALS.md con datos de prueba
+> - Creado AWS_DEPLOYMENT.md con roadmap de deployment
+> - Endpoints de managers testeados manualmente y funcionando
+>
 > **Cambios v4.5:**
 >
 > - CRUD completo de Restaurants (create, list, getById, update, deactivate)

@@ -1,34 +1,53 @@
+import "dotenv/config";
 import prisma from "../src/config/databases/prisma";
 import { hashPassword } from "../src/utils/password";
 
 async function main() {
   console.log("🌱 Seeding database...");
 
-  // Check if super_admin already exists
+  const hashedPassword = await hashPassword("password123");
+
+  // Create super_admin
   const existingAdmin = await prisma.user.findUnique({
     where: { email: "admin@booking.com" },
   });
 
   if (existingAdmin) {
     console.log("⚠️  Super admin already exists, skipping...");
-    return;
+  } else {
+    const superAdmin = await prisma.user.create({
+      data: {
+        email: "admin@booking.com",
+        passwordHash: hashedPassword,
+        firstName: "Super",
+        lastName: "Admin",
+        phone: null,
+        role: "super_admin",
+      },
+    });
+    console.log("✅ Super admin created:", superAdmin.email);
   }
 
-  // Create super_admin
-  const hashedPassword = await hashPassword("password123");
-
-  const superAdmin = await prisma.user.create({
-    data: {
-      email: "admin@booking.com",
-      passwordHash: hashedPassword,
-      firstName: "Jonathan",
-      lastName: "Admin",
-      phone: null,
-      role: "super_admin",
-    },
+  // Create owner
+  const existingOwner = await prisma.user.findUnique({
+    where: { email: "owner@booking.com" },
   });
 
-  console.log("✅ Super admin created:", superAdmin.email);
+  if (existingOwner) {
+    console.log("⚠️  Owner already exists, skipping...");
+  } else {
+    const owner = await prisma.user.create({
+      data: {
+        email: "owner@booking.com",
+        passwordHash: hashedPassword,
+        firstName: "Test",
+        lastName: "Owner",
+        phone: "1234567890",
+        role: "owner",
+      },
+    });
+    console.log("✅ Owner created:", owner.email);
+  }
 }
 
 main()
