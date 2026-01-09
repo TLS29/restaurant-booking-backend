@@ -25,12 +25,7 @@ export const list = async (req: Request, res: Response) => {
     const query = listQuerySchema.parse(req.query);
     const uow = new UnitOfWorkPrisma(prisma);
     const listUseCase = new List(uow);
-    const data = await listUseCase.execute(
-      req.user!.userId,
-      id,
-      query.page,
-      query.limit
-    );
+    const data = await listUseCase.execute(id, query.page, query.limit);
     res.status(200).json(data);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -65,10 +60,7 @@ export const create = async (req: Request, res: Response) => {
     const validatedData = createSchema.parse(req.body);
     const uow = new UnitOfWorkPrisma(prisma);
     const createUseCase = new Create(uow, { hashPassword });
-    const result = await createUseCase.execute({
-      ...validatedData,
-      ownerId: req.user!.userId,
-    });
+    const result = await createUseCase.execute(validatedData);
     res.status(201).json({
       message: SUCCESS_MESSAGES.MANAGER_CREATED,
       data: result,
@@ -111,7 +103,6 @@ export const update = async (req: Request, res: Response) => {
     const result = await updateUseCase.execute(
       userId,
       restaurantId,
-      req.user!.userId,
       validatedData
     );
     res.status(200).json({
@@ -152,7 +143,7 @@ export const destroy = async (req: Request, res: Response) => {
     const { id, userId } = req.params;
     const uow = new UnitOfWorkPrisma(prisma);
     const destroyUseCase = new Delete(uow);
-    const data = await destroyUseCase.execute(req.user!.userId, userId, id);
+    const data = await destroyUseCase.execute(userId, id);
     res.status(200).json({
       message: SUCCESS_MESSAGES.MANAGER_DESTROYED,
       data,

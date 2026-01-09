@@ -181,3 +181,72 @@ When an owner creates a manager/staff, the credentials (email and password) are 
 - Consider generating random temporary password instead of using provided one
 - Email should not be stored in logs
 - Add rate limiting to prevent abuse
+
+---
+
+## Full Dependency Injection (Composition Root)
+
+**Status:** Pending (Learning)
+**Priority:** Low
+**Added:** 2025-01-07
+
+### Description
+
+Implement full DI with a Composition Root pattern. Currently the project uses "Level 1 DI" where controllers instantiate UoW and pass it to use cases. "Level 2 DI" moves all instantiation to a central place.
+
+### Current Approach (Level 1 - Valid)
+
+```typescript
+// Controller instantiates dependencies
+export const list = async (req: Request, res: Response) => {
+  const uow = new UnitOfWorkPrisma(prisma);
+  const listUseCase = new List(uow);
+  // ...
+};
+```
+
+**Pros:** Simple, works well, use cases are testable
+**Cons:** Controllers know about concrete implementations (UnitOfWorkPrisma, prisma)
+
+### Proposed Approach (Level 2 - Enterprise)
+
+```typescript
+// composition-root.ts - ONLY place with concrete implementations
+import prisma from "./config/databases/prisma";
+import { UnitOfWorkPrisma } from "./repositories/prisma/unit-of-work";
+import { List } from "./use-cases/managers/list";
+
+const uow = new UnitOfWorkPrisma(prisma);
+
+export const managerUseCases = {
+  list: new List(uow),
+  create: new Create(uow),
+  // ...
+};
+
+// controller.ts - Only knows interfaces
+export const createManagerController = (useCases: ManagerUseCases) => ({
+  list: async (req: Request, res: Response) => {
+    const data = await useCases.list.execute(...);
+    // ...
+  },
+});
+
+// routes.ts - Receives configured controller
+import { managerUseCases } from "./composition-root";
+const controller = createManagerController(managerUseCases);
+router.get("/staff", controller.list);
+```
+
+### When to Use Level 2
+
+- Large enterprise projects
+- When using DI frameworks (NestJS, InversifyJS, tsyringe)
+- When you need to swap implementations frequently
+- When controllers have complex logic that needs unit testing
+
+### Learning Resources
+
+- "Dependency Injection Principles, Practices, and Patterns" by Mark Seemann
+- NestJS documentation on DI
+- InversifyJS for TypeScript DI containers

@@ -10,25 +10,13 @@ export class Delete {
 
   /**
    * Removes a manager from a restaurant
-   * @param ownerId - Owner's unique identifier for validation
    * @param userId - Manager's user unique identifier
    * @param restaurantId - Restaurant's unique identifier
    * @returns Deleted UserRestaurant record
-   * @throws Error if restaurant not found, not owned by user, or manager not found
+   * @throws Error if manager not found in restaurant
    */
-  async execute(ownerId: string, userId: string, restaurantId: string) {
-    const restaurant = await this.uow.restaurantRepository.findById(
-      restaurantId
-    );
 
-    if (!restaurant) {
-      throw new Error(ERROR_MESSAGES.RESTAURANT_NOT_FOUND);
-    }
-
-    if (restaurant.ownerId !== ownerId) {
-      throw new Error(ERROR_MESSAGES.NOT_YOUR_RESTAURANT);
-    }
-
+  async execute(userId: string, restaurantId: string) {
     const assignment =
       await this.uow.userRestaurantRepository.findByUserAndRestaurant(
         userId,

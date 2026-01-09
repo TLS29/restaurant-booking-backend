@@ -1,91 +1,112 @@
 import { describe, it, expect, jest, beforeEach } from "@jest/globals";
-import { Create } from "../../../../use-cases/owners/create";
 import { createMockUow } from "../../../mocks/unit-of-work.mock";
+import { Create } from "../../../../use-cases/managers/create";
 import { User } from "../../../../domain/user.entity";
 import { ERROR_MESSAGES } from "../../../../constants/messages";
-import { CreateDTO } from "../../../../dto/owner";
+import { CreateDTO } from "../../../../dto/manager";
 
-describe("Create Owners Use Case", () => {
-  // Repository mock
-  const { mockUow, mockUserRepository } = createMockUow();
+describe("Create Manager Use Case", () => {
+  const { mockUow, mockUserRepository, mockUserRestaurantRepository } =
+    createMockUow();
 
-  // Use case instance with mock
-  const useCase = new Create(mockUow);
+  const mockHashPassword = jest.fn<(password: string) => Promise<string>>();
+  const useCase = new Create(mockUow, { hashPassword: mockHashPassword });
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("should create an owner", async () => {
+  it("should create a manager successfully", async () => {
     // Arrange
+
     const mockCreatedUser = new User(
       "123",
-      "owner@test.com",
+      "manager@test.com",
       "hashedPassword",
       "Carlos",
       "Smith",
       "5551234567",
-      "owner",
+      "customer",
       new Date(),
       new Date(),
       null
     );
 
     const inputData: CreateDTO = {
-      email: "owner@test.com",
+      email: "manager@test.com",
       password: "plainPassword123",
       firstName: "Carlos",
       lastName: "Smith",
+      restaurantId: "12",
       phone: "5551234567",
     };
 
     mockUserRepository.findByEmail.mockResolvedValue(null);
     mockUserRepository.create.mockResolvedValue(mockCreatedUser);
+    mockHashPassword.mockResolvedValue("hashedPassword123");
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (mockUow.transaction as jest.Mock).mockImplementation(async (callback: any) => {
+      return callback(mockUow);
+    });
+
+    mockUserRestaurantRepository.create.mockResolvedValue({
+      id: "ur-123",
+      userId: "123",
+      restaurantId: "12",
+      staffRole: "manager",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
 
     // Act
     const result = await useCase.execute(inputData);
 
     // Assert
     expect(mockUserRepository.findByEmail).toHaveBeenCalledWith(
-      "owner@test.com"
+      "manager@test.com"
     );
     expect(mockUserRepository.create).toHaveBeenCalled();
-    expect(result.email).toBe("owner@test.com");
+    expect(result.email).toBe("manager@test.com");
     expect(result).not.toHaveProperty("passwordHash");
   });
 
-  it("should throw an error if email already exists", async () => {
+  it("should throw error if email already exists", async () => {
     // Arrange
     const existingUser = new User(
-      "123",
-      "owner@test.com",
+      "existing-123",
+      "manager@test.com",
       "hashedPassword",
-      "Carlos",
-      "Smith",
-      "5551234567",
-      "owner",
+      "Existing",
+      "User",
+      "5559999999",
+      "customer",
       new Date(),
       new Date(),
       null
     );
 
     const inputData: CreateDTO = {
-      email: "owner@test.com",
+      email: "manager@test.com",
       password: "plainPassword123",
       firstName: "Carlos",
       lastName: "Smith",
+      restaurantId: "12",
       phone: "5551234567",
     };
 
-    mockUserRepository.findByEmail.mockResolvedValue(existingUser); // Email already exists
+    // Mock findByEmail to return existing user
+    mockUserRepository.findByEmail.mockResolvedValue(existingUser);
 
     // Act & Assert
     await expect(useCase.execute(inputData)).rejects.toThrow(
       ERROR_MESSAGES.EMAIL_ALREADY_EXISTS
     );
+
     expect(mockUserRepository.findByEmail).toHaveBeenCalledWith(
-      "owner@test.com"
+      "manager@test.com"
     );
+    // Should NOT call create since email exists
     expect(mockUserRepository.create).not.toHaveBeenCalled();
   });
 });

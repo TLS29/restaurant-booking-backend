@@ -13,29 +13,11 @@ export class Update {
    * Updates a manager's user information
    * @param userId - Manager's user unique identifier
    * @param restaurantId - Restaurant's unique identifier
-   * @param ownerId - Owner's unique identifier for validation
    * @param data - Update data (email, firstName, lastName, phone)
    * @returns Updated user public data
-   * @throws Error if restaurant not found, not owned by user, or manager not found
+   * @throws Error if manager not found in restaurant
    */
-  async execute(
-    userId: string,
-    restaurantId: string,
-    ownerId: string,
-    data: UpdateDTO
-  ) {
-    const restaurant = await this.uow.restaurantRepository.findById(
-      restaurantId
-    );
-
-    if (!restaurant) {
-      throw new Error(ERROR_MESSAGES.RESTAURANT_NOT_FOUND);
-    }
-
-    if (restaurant.ownerId !== ownerId) {
-      throw new Error(ERROR_MESSAGES.NOT_YOUR_RESTAURANT);
-    }
-
+  async execute(userId: string, restaurantId: string, data: UpdateDTO) {
     const assignment =
       await this.uow.userRestaurantRepository.findByUserAndRestaurant(
         userId,

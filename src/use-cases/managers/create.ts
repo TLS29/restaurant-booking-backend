@@ -15,31 +15,18 @@ export class Create {
 
   /**
    * Creates a new manager user and assigns them to a restaurant
-   * @param data - Manager data including restaurantId and ownerId
+   * @param data - Manager data including restaurantId
    * @returns Public user data of the created manager
-   * @throws Error if restaurant not found, not owned by user, or email exists
+   * @throws Error if email already exists
    */
-  async execute(data: CreateDTO & { ownerId: string }) {
-    // 1. Validate restaurant exists
-    const restaurant = await this.uow.restaurantRepository.findById(
-      data.restaurantId
-    );
-    if (!restaurant) {
-      throw new Error(ERROR_MESSAGES.RESTAURANT_NOT_FOUND);
-    }
-
-    // 2. Validate restaurant belongs to the owner
-    if (restaurant.ownerId !== data.ownerId) {
-      throw new Error(ERROR_MESSAGES.NOT_YOUR_RESTAURANT);
-    }
-
-    // 3. Validate email doesn't exist
+  async execute(data: CreateDTO) {
+    // 1. Validate email doesn't exist
     const existingUser = await this.uow.userRepository.findByEmail(data.email);
     if (existingUser) {
       throw new Error(ERROR_MESSAGES.EMAIL_ALREADY_EXISTS);
     }
 
-    // 4. Create via Factory
+    // 2. Create via Factory
     const factory = new StaffFactory(this.uow, this.factoryDeps);
     return factory.create(StaffRole.manager, data);
   }
