@@ -1,7 +1,7 @@
 # 📋 SISTEMA DE RESERVACIONES MULTITENANT - Documento de Contexto
 
-> **Versión:** 5.0
-> **Última actualización:** 2025-12-27
+> **Versión:** 5.1
+> **Última actualización:** 2025-01-09
 > **Autor:** Jonathan García (con mentoría de Claude)
 
 ---
@@ -23,8 +23,8 @@
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  FASE ACTUAL: 2 - Gestión de Restaurantes               │
-│  PASO ACTUAL: ✅ CRUD Managers (por Owner)              │
-│  SIGUIENTE:   ⬚ Middleware requireRestaurantAccess     │
+│  PASO ACTUAL: ✅ Middleware requireRestaurantAccess     │
+│  SIGUIENTE:   ⬚ Middleware requireStaffRole            │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -54,6 +54,8 @@
 - ✅ Unit of Work pattern para transacciones
 - ✅ Mock factory pattern para tests unitarios
 - ✅ Swagger documentation para endpoints de admin
+- ✅ Middleware: requireRestaurantAccess (factory function + DI)
+- ✅ Unit tests para managers use cases (100% coverage)
 
 ---
 
@@ -83,7 +85,7 @@
 | 2.1 | CRUD Restaurants (owner crea/gestiona sus restaurantes) | ✅  | **Multitenant Isolation**          |
 | 2.2 | CRUD Managers (owner gestiona managers de su restaurante) | ✅     | **Unit of Work + Transactions** |
 | 2.3 | Middleware: requireOwner                             | ✅     | —                                  |
-| 2.4 | Middleware: requireRestaurantAccess                  | ⬚      | —                                  |
+| 2.4 | Middleware: requireRestaurantAccess                  | ✅     | **Factory Function + DI**          |
 | 2.5 | Middleware: requireStaffRole (verificar rol mínimo)  | ⬚      | **Strategy Pattern**               |
 
 > 💡 **Nota sobre Unit of Work + Transactions (2.2):**
@@ -581,6 +583,7 @@ if (!hasAccess) {
 | 2025-12-08 | CRUD owners completo, refactor DI, Jest setup, unit tests | CRUD restaurants        |
 | 2025-12-12 | CRUD restaurants completo, requireOwner, unit tests, soft delete | Owner agrega staff |
 | 2025-12-27 | CRUD Managers completo, Unit of Work pattern, mock factory, Swagger docs, tests manuales | Middleware requireRestaurantAccess |
+| 2025-01-09 | Middleware requireRestaurantAccess con factory function + DI, refactor use cases managers, unit tests managers | Middleware requireStaffRole |
 
 ---
 
@@ -658,7 +661,16 @@ export const execute = async (id: string) => {
 
 ---
 
-> **Versión:** 5.0
+> **Versión:** 5.1
+> **Cambios v5.1:**
+>
+> - Middleware requireRestaurantAccess implementado con factory function + DI
+> - Refactor use cases de managers (quitada validación redundante de ownership)
+> - Extendido tipo Request de Express para incluir `restaurant`
+> - Unit tests para todos los use cases de managers (create, list, update, delete)
+> - Coverage 95%+ en use cases
+> - Documentado DI nivel 2 (Composition Root) en FUTURE_FEATURES.md
+>
 > **Cambios v5.0:**
 >
 > - CRUD completo de Managers (create, list, update, delete)
