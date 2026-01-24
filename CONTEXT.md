@@ -1,7 +1,7 @@
 # 📋 SISTEMA DE RESERVACIONES MULTITENANT - Documento de Contexto
 
-> **Versión:** 5.1
-> **Última actualización:** 2025-01-09
+> **Versión:** 5.2
+> **Última actualización:** 2025-01-23
 > **Autor:** Jonathan García (con mentoría de Claude)
 
 ---
@@ -22,9 +22,9 @@
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  FASE ACTUAL: 2 - Gestión de Restaurantes               │
-│  PASO ACTUAL: ✅ Middleware requireRestaurantAccess     │
-│  SIGUIENTE:   ⬚ Middleware requireStaffRole            │
+│  FASE ACTUAL: 3 - Gestión de Mesas                      │
+│  PASO ACTUAL: ✅ Middleware requireStaffRole            │
+│  SIGUIENTE:   ⬚ Endpoint: Admin/Owner crea mesa        │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -56,6 +56,7 @@
 - ✅ Swagger documentation para endpoints de admin
 - ✅ Middleware: requireRestaurantAccess (factory function + DI)
 - ✅ Unit tests para managers use cases (100% coverage)
+- ✅ Middleware: requireStaffRole (Strategy Pattern)
 
 ---
 
@@ -86,7 +87,7 @@
 | 2.2 | CRUD Managers (owner gestiona managers de su restaurante) | ✅     | **Unit of Work + Transactions** |
 | 2.3 | Middleware: requireOwner                             | ✅     | —                                  |
 | 2.4 | Middleware: requireRestaurantAccess                  | ✅     | **Factory Function + DI**          |
-| 2.5 | Middleware: requireStaffRole (verificar rol mínimo)  | ⬚      | **Strategy Pattern**               |
+| 2.5 | Middleware: requireStaffRole (verificar rol mínimo)  | ✅     | **Strategy Pattern**               |
 
 > 💡 **Nota sobre Unit of Work + Transactions (2.2):**
 > **Unit of Work** agrupa múltiples operaciones de repositorio en una unidad transaccional. Todos los repositorios acceden via `IUnitOfWork` que provee acceso a `userRepository`, `restaurantRepository`, `userRestaurantRepository`. **Transaction** garantiza que crear usuario + asignar a restaurante sea atómico. Si falla alguna parte, todo se revierte.
@@ -584,6 +585,7 @@ if (!hasAccess) {
 | 2025-12-12 | CRUD restaurants completo, requireOwner, unit tests, soft delete | Owner agrega staff |
 | 2025-12-27 | CRUD Managers completo, Unit of Work pattern, mock factory, Swagger docs, tests manuales | Middleware requireRestaurantAccess |
 | 2025-01-09 | Middleware requireRestaurantAccess con factory function + DI, refactor use cases managers, unit tests managers | Middleware requireStaffRole |
+| 2025-01-23 | Middleware requireStaffRole con Strategy Pattern, unit tests | CRUD Mesas (Fase 3) |
 
 ---
 
@@ -661,7 +663,14 @@ export const execute = async (id: string) => {
 
 ---
 
-> **Versión:** 5.1
+> **Versión:** 5.2
+> **Cambios v5.2:**
+>
+> - Middleware requireStaffRole implementado con Strategy Pattern
+> - Jerarquía de roles: staff < manager < owner (owner siempre tiene acceso completo)
+> - Unit tests para requireStaffRole middleware
+> - Fase 2 completada, inicio Fase 3 (Gestión de Mesas)
+>
 > **Cambios v5.1:**
 >
 > - Middleware requireRestaurantAccess implementado con factory function + DI

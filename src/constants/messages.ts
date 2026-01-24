@@ -9,6 +9,8 @@ export const ERROR_MESSAGES = {
   EMAIL_ALREADY_EXISTS: "Email already registered",
   NO_TOKEN_PROVIDED: "No token provided",
   INVALID_TOKEN: "Invalid token",
+  ACCESS_DENIED: "Access denied",
+  INSUFFICIENT_PERMISSIONS: "Insufficient permissions",
 
   // Authorization
   SUPER_ADMIN_ONLY: "Access denied. Super admin only.",
@@ -28,6 +30,7 @@ export const ERROR_MESSAGES = {
 
   // manager
   MANAGER_NOT_FOUND: "Manager not found",
+  STAFF_ROLE_REQUIRED: "Staff role is required for this action",
 } as const;
 
 export const SUCCESS_MESSAGES = {
