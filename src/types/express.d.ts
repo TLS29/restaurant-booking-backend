@@ -1,4 +1,5 @@
 import { Restaurant } from "../domain/restaurant.entity";
+import { StaffRole } from "@prisma/client";
 
 declare global {
   namespace Express {
@@ -8,6 +9,7 @@ declare global {
         role: string;
       };
       restaurant?: Restaurant;
+      staffRole?: StaffRole;
     }
   }
 }

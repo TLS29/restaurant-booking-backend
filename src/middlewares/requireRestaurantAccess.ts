@@ -18,11 +18,7 @@ export const createRequireRestaurantAccess = (uow: IUnitOfWork) => {
     const userId = req.user!.userId;
     const userRole = req.user!.role;
 
-    if (userRole === UserRole.super_admin) {
-      req.restaurant = restaurant;
-      return next();
-    }
-
+    // Owner can only access their own restaurants
     if (userRole === UserRole.owner) {
       if (restaurant.ownerId !== userId) {
         return res
@@ -33,14 +29,16 @@ export const createRequireRestaurantAccess = (uow: IUnitOfWork) => {
       return next();
     }
 
+    // Staff users - check restaurant assignment
     const staffAccess =
       await uow.userRestaurantRepository.findByUserAndRestaurant(
         userId,
-        restaurantId
+        restaurantId,
       );
 
     if (staffAccess) {
       req.restaurant = restaurant;
+      req.staffRole = staffAccess.staffRole;
       return next();
     }
 
