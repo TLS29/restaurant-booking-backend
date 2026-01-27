@@ -3,6 +3,7 @@ import { IUserRepository } from "../../repositories/interfaces/user";
 import { IRestaurantRepository } from "../../repositories/interfaces/restaurant";
 import { IUserRestaurantRepository } from "../../repositories/interfaces/user-restaurant";
 import { IUnitOfWork } from "../../repositories/interfaces/unit-of-work";
+import { ITablesRepository } from "../../repositories/interfaces/tables";
 
 /**
  * Creates fresh mock instances of UnitOfWork and its repositories
@@ -35,15 +36,22 @@ export function createMockUow() {
     delete: jest.fn(),
   };
 
+  const mockTablesRepository: jest.Mocked<ITablesRepository> = {
+    create: jest.fn(),
+    findByRestaurantAndTableNumber: jest.fn(),
+  };
+
   return {
     mockUow: {
       userRepository: mockUserRepository,
       restaurantRepository: mockRestaurantRepository,
       userRestaurantRepository: mockUserRestaurantRepository,
+      tablesRepository: mockTablesRepository,
       transaction: jest.fn(),
     } as unknown as IUnitOfWork,
     mockUserRepository,
     mockRestaurantRepository,
     mockUserRestaurantRepository,
+    mockTablesRepository,
   };
 }

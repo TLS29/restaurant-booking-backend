@@ -52,6 +52,10 @@ paths:
   /api/admin/restaurants/{id}/staff/{userId}:
     $ref: './admin.yaml#/paths/~1api~1admin~1restaurants~1{id}~1staff~1{userId}'
 
+  # Admin endpoints (Tables management)
+  /api/admin/restaurants/{id}/tables:
+    $ref: './admin.yaml#/paths/~1api~1admin~1restaurants~1{id}~1tables'
+
 components:
   schemas:
     # Common schemas

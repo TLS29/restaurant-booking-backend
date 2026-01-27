@@ -31,6 +31,9 @@ export const ERROR_MESSAGES = {
   // manager
   MANAGER_NOT_FOUND: "Manager not found",
   STAFF_ROLE_REQUIRED: "Staff role is required for this action",
+
+  // Table
+  TABLE_NUMBER_ALREADY_EXISTS: "Table number already exists in this restaurant",
 } as const;
 
 export const SUCCESS_MESSAGES = {
@@ -45,4 +48,5 @@ export const SUCCESS_MESSAGES = {
   MANAGER_CREATED: "Manager created successfully",
   MANAGER_UPDATED: "Manager updated successfully",
   MANAGER_DESTROYED: "Manager deleted successfully",
+  TABLE_CREATED: "Table created successfully",
 } as const;
