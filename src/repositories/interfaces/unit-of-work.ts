@@ -1,6 +1,7 @@
 import { IUserRepository } from "./user";
 import { IRestaurantRepository } from "./restaurant";
 import { IUserRestaurantRepository } from "./user-restaurant";
+import { ITablesRepository } from "./tables";
 
 /**
  * Unit of Work interface for managing transactional operations
@@ -13,6 +14,8 @@ export interface IUnitOfWork {
   restaurantRepository: IRestaurantRepository;
   /** User-Restaurant relationship repository instance */
   userRestaurantRepository: IUserRestaurantRepository;
+  /** Tables repository instance */
+  tablesRepository: ITablesRepository;
 
   /**
    * Execute operations within a transaction

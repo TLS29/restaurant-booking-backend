@@ -241,6 +241,70 @@ paths:
               schema:
                 $ref: './schemas/errors.yaml#/components/schemas/Error'
 
+  /api/admin/restaurants/{id}/tables:
+    post:
+      tags:
+        - Admin
+      summary: Create a new table
+      description: |
+        Creates a new table for a restaurant.
+        Accessible by the restaurant owner or managers.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Restaurant's unique identifier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTableRequest'
+      responses:
+        '201':
+          description: Table created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateTableResponse'
+        '400':
+          description: Validation error or duplicate table number
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: './schemas/errors.yaml#/components/schemas/ValidationError'
+                  - $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '401':
+          description: No token provided or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '403':
+          description: Access denied - Owner or Manager only
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '404':
+          description: Restaurant not found
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/errors.yaml#/components/schemas/Error'
+
 components:
   schemas:
     StaffMember:
@@ -413,3 +477,56 @@ components:
         message:
           type: string
           example: Manager deleted successfully
+
+    # Table schemas
+    Table:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        tableNumber:
+          type: string
+          example: "A1"
+        area:
+          type: string
+          nullable: true
+          example: "Terrace"
+        capacity:
+          type: integer
+          minimum: 1
+          example: 4
+        isAvailable:
+          type: boolean
+          example: true
+
+    CreateTableRequest:
+      type: object
+      required:
+        - tableNumber
+        - capacity
+      properties:
+        tableNumber:
+          type: string
+          minLength: 1
+          description: Unique table identifier within the restaurant
+          example: "A1"
+        area:
+          type: string
+          description: Optional area/zone where the table is located
+          example: "Terrace"
+        capacity:
+          type: integer
+          minimum: 1
+          description: Maximum number of guests the table can accommodate
+          example: 4
+
+    CreateTableResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Table created successfully
+        table:
+          $ref: '#/components/schemas/Table'
